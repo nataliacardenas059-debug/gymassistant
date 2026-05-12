@@ -17,7 +17,7 @@ app.use('/api/auth', authRoutes);
 // archivos estáticos (tu frontend)
 app.use(express.static(path.join(__dirname, 'public')));
 
-const PORT = 3000;
-app.listen(PORT, () => {
-    console.log(`Servidor corriendo en http://localhost:${PORT}`);
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, '0.0.0.0', () => {
+    console.log("Servidor corriendo en puerto", PORT);
 });
