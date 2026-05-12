@@ -2,21 +2,29 @@ const express = require('express');
 const router = express.Router();
 const db = require('../db');
 
-// 🔹 FUNCIÓN PARA GENERAR CORREO
-function generarCorreo(nombreCompleto, numeroDocumento, tipoPersona) {
-    const partes = nombreCompleto.toLowerCase().split(" ");
+// FUNCIÓN PARA GENERAR CORREO
+function limpiarTexto(texto) {
+    return texto
+        .toLowerCase()
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .replace(/\s+/g, " ");
+}
 
-    let nombre = partes[0];
+function generarCorreo(nombreCompleto, numeroDocumento, tipoPersona) {
+    const limpio = limpiarTexto(nombreCompleto);
+    const partes = limpio.split(" ");
+
+    let nombre = partes[0] || "";
     let apellido = partes[1] || "";
 
-    // profesor → solo inicial del nombre
     if (tipoPersona === "profesor") {
         nombre = nombre.charAt(0);
     }
 
     const ultimos = numeroDocumento.slice(-3);
 
-    return `${nombre}${apellido}${ultimos}@pascualbravo.edu.co`;
+    return `${nombre}.${apellido}${ultimos}@pascualbravo.edu.co`;
 }
 
 // LISTAR PERSONAS
@@ -40,13 +48,16 @@ router.post('/', (req, res) => {
         horas_semana
     } = req.body;
 
+    // GENERAR CORREO
+    const correo = generarCorreo(nombre_completo, numero_documento, tipo_persona);
+
     const sql = `
         INSERT INTO personas 
-        (nombre_completo, numero_documento, tipo_documento, tipo_persona, estado)
-        VALUES (?, ?, ?, ?, 'activo')
+        (nombre_completo, numero_documento, tipo_documento, tipo_persona, correo, estado)
+        VALUES (?, ?, ?, ?, ?, 'activo')
     `;
 
-    db.query(sql, [nombre_completo, numero_documento, tipo_documento, tipo_persona], (err, result) => {
+    db.query(sql, [nombre_completo, numero_documento, tipo_documento, tipo_persona, correo], (err, result) => {
 
         if (err) {
             if (err.code === 'ER_DUP_ENTRY') {
@@ -57,7 +68,7 @@ router.post('/', (req, res) => {
 
         const personaId = result.insertId;
 
-        // 🔥 SI ES PROFESOR → INSERTAR EN OTRA TABLA
+        // SI ES PROFESOR
         if (tipo_persona === "profesor") {
 
             db.query(`
@@ -71,11 +82,11 @@ router.post('/', (req, res) => {
                     return res.status(500).json({ mensaje: 'Error al guardar profesor' });
                 }
 
-                return res.json({ mensaje: 'Profesor registrado correctamente' });
+                return res.json({ mensaje: 'Profesor registrado correctamente', correo });
             });
 
         } else {
-            res.json({ mensaje: 'Persona creada correctamente' });
+            res.json({ mensaje: 'Persona creada correctamente', correo });
         }
     });
 });

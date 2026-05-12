@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 12-05-2026 a las 01:32:23
+-- Tiempo de generación: 12-05-2026 a las 03:24:25
 -- Versión del servidor: 10.4.32-MariaDB
 -- Versión de PHP: 8.2.12
 
@@ -128,17 +128,20 @@ CREATE TABLE `personas` (
 --
 
 INSERT INTO `personas` (`id`, `nombre_completo`, `numero_documento`, `tipo_documento`, `tipo_persona`, `rol`, `estado`, `ultima_asistencia`, `correo`) VALUES
-(2, 'Sara Sanchez', '1279027216', 'cc', 'estudiante', 'estudiante', 'activo', NULL, 'saraSanchez216@pascualbravo.edu.co'),
-(8, 'Juan Cardona', '1023823972', 'ti', 'estudiante', 'estudiante', 'activo', NULL, 'juanCardona972@pascualbravo.edu.co'),
-(9, 'Yasmin Liliana Isaza', '4353063721', 'CE', 'profesor', 'estudiante', 'activo', NULL, 'yliliana721@pascualbravo.edu.co'),
-(10, 'Daniel Gonzalez Acevedo', '1022273640', 'PAS', 'estudiante', 'estudiante', 'activo', NULL, 'danielgonzalez640@pascualbravo.edu.co'),
-(11, 'Martin Cardona Velez', '25237392', 'CC', 'administrativo', 'estudiante', 'activo', NULL, 'martincardona392@pascualbravo.edu.co'),
-(12, 'Sofia Guzman Jaramillo', '273182029', 'CE', 'administrativo', 'estudiante', 'activo', NULL, 'sofiaguzman029@pascualbravo.edu.co'),
-(13, 'Santiago Slazar Pineda', '12823218', 'CC', 'profesor', 'estudiante', 'activo', NULL, 'sslazar218@pascualbravo.edu.co'),
-(15, 'Luisa Fernanda Cárdenas Parra', '2716780', 'CC', 'profesor', 'estudiante', 'activo', NULL, NULL),
-(16, 'Natalia Cárdenas Vásquez', '1034991059', 'CC', 'estudiante', 'estudiante', 'activo', NULL, NULL),
-(17, 'Luisa Fernanda Cárdenas Parra', '215921289', 'CC', 'profesor', 'estudiante', 'activo', NULL, NULL),
-(18, 'Fernando Gaviria Salazar ', '48273843', 'CC', 'profesor', 'estudiante', 'activo', NULL, NULL);
+(2, 'Sara Sanchez', '1279027216', 'cc', 'estudiante', 'estudiante', 'activo', NULL, 'sara.sanchez216@pascualbravo.edu.co'),
+(8, 'Juan Cardona', '1023823972', 'ti', 'estudiante', 'estudiante', 'activo', NULL, 'juan.cardona972@pascualbravo.edu.co'),
+(9, 'Yasmin Liliana Isaza', '4353063721', 'CE', 'profesor', 'estudiante', 'activo', NULL, 'yasmin.liliana721@pascualbravo.edu.co'),
+(10, 'Daniel Gonzalez Acevedo', '1022273640', 'PAS', 'estudiante', 'estudiante', 'activo', NULL, 'daniel.gonzalez640@pascualbravo.edu.co'),
+(11, 'Martin Cardona Velez', '25237392', 'CC', 'administrativo', 'estudiante', 'activo', NULL, 'martin.cardona392@pascualbravo.edu.co'),
+(12, 'Sofia Guzman Jaramillo', '273182029', 'CE', 'administrativo', 'estudiante', 'activo', NULL, 'sofia.guzman029@pascualbravo.edu.co'),
+(13, 'Santiago Slazar Pineda', '12823218', 'CC', 'profesor', 'estudiante', 'activo', NULL, 'santiago.slazar218@pascualbravo.edu.co'),
+(15, 'Luisa Fernanda Cárdenas Parra', '2716780', 'CC', 'profesor', 'estudiante', 'activo', NULL, 'luisa.fernanda780@pascualbravo.edu.co'),
+(16, 'Natalia Cárdenas Vásquez', '1034991059', 'CC', 'estudiante', 'estudiante', 'activo', NULL, 'natalia.cardenas059@pascualbravo.edu.co'),
+(17, 'Luisa Fernanda Cárdenas Parra', '215921289', 'CC', 'profesor', 'estudiante', 'activo', NULL, 'luisa.fernanda289@pascualbravo.edu.co'),
+(18, 'Fernando Gaviria Salazar ', '48273843', 'CC', 'profesor', 'estudiante', 'activo', NULL, 'fernando.gaviria843@pascualbravo.edu.co'),
+(19, 'Carlos Rivera Sánchez ', '2627289', 'CE', 'administrativo', 'estudiante', 'activo', NULL, 'carlos.rivera289@pascualbravo.edu.co'),
+(20, 'Mónica Agudelo Cárdenas ', '26191039', 'TI', 'estudiante', 'estudiante', 'activo', NULL, 'monica.agudelo039@pascualbravo.edu.co'),
+(21, 'Natalia Acevedo Gonzales', '261281209', 'PAS', 'estudiante', 'estudiante', 'activo', NULL, 'natalia.acevedo209@pascualbravo.edu.co');
 
 --
 -- Disparadores `personas`
@@ -334,7 +337,7 @@ ALTER TABLE `membresias`
 -- AUTO_INCREMENT de la tabla `personas`
 --
 ALTER TABLE `personas`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=19;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=22;
 
 --
 -- AUTO_INCREMENT de la tabla `profesores`
