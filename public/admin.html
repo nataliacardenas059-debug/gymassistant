@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="es">
+<script>
+    const rol = localStorage.getItem("rol");
+
+    if (rol !== "admin") {
+        window.location.href = "index.html";
+    }
+</script>
+
+<head>
+    <meta charset="UTF-8">
+    <title>Panel Administrativo</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+    <button class="menu-toggle" onclick="toggleMenu()">☰</button>
+
+    <div class="layout">
+
+        <!-- 🔹 SIDEBAR -->
+        <aside class="sidebar">
+            <h2>🏋️ GymAssistant</h2>
+
+            <button class="nav-btn active" onclick="mostrar('dashboard', this)">📊 Dashboard</button>
+            <button class="nav-btn" onclick="mostrar('registro', this)">➕ Registrar</button>
+            <button class="nav-btn" onclick="mostrar('usuarios', this)">👥 Usuarios</button>
+            <button class="nav-btn" onclick="mostrar('membresia', this)">💳 Membresía</button>
+            <button class="nav-btn" onclick="mostrar('consulta', this)">🔍 Consulta</button>
+            <button class="nav-btn" onclick="mostrar('ingreso', this)">🚪 Ingreso</button>
+
+            <button onclick="toggleModo()">🌙 Modo</button>
+
+            <div class="logout">
+                <button onclick="logout()">🚪 Cerrar sesión</button>
+            </div>
+        </aside>
+
+        <!-- 🔹 CONTENIDO -->
+        <main class="main">
+            <h1>Panel Administrativo</h1>
+
+            <!-- DASHBOARD -->
+            <div id="dashboard" class="section">
+                <h2>Resumen General</h2>
+
+                <div class="cards">
+                    <div class="card">
+                        <p>Total Usuarios</p>
+                        <h3 id="totalUsuarios">0</h3>
+                    </div>
+
+                    <div class="card">
+                        <p>Membresías Activas</p>
+                        <h3 id="membresiasActivas">0</h3>
+                    </div>
+                </div>
+            </div>
+
+            <!-- REGISTRO -->
+            <div id="registro" class="section hidden">
+                <h2>Registrar Usuario</h2>
+
+                <form id="formPersona" class="form-card">
+                    <div class="grid">
+                        <input type="text" id="nombre" placeholder="Nombre completo" required>
+                        <input type="text" id="documento" placeholder="Documento" required>
+
+                        <select id="tipo_doc">
+                            <option value="CC">Cédula</option>
+                            <option value="TI">Tarjeta</option>
+                            <option value="CE">Extranjería</option>
+                            <option value="PAS">Pasaporte</option>
+                        </select>
+
+                        <select id="tipo_persona" onchange="mostrarCamposProfesor()">
+                            <option value="estudiante">Estudiante</option>
+                            <option value="profesor">Profesor</option>
+                            <option value="administrativo">Administrativo</option>
+                        </select>
+                        <div id="camposProfesor" style="display:none; margin-top:10px;">
+
+                            <select id="tipo_profesor">
+                                <option value="vinculado">Vinculado</option>
+                                <option value="no_vinculado">No vinculado</option>
+                            </select>
+
+                            <input type="number" id="horas_semana" placeholder="Horas esta semana" value="0">
+
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn-primary">Registrar</button>
+                </form>
+            </div>
+
+            <!-- USUARIOS -->
+            <div id="usuarios" class="section hidden">
+                <h2>Usuarios Registrados</h2>
+
+                <input type="text" id="buscador" placeholder="Buscar usuario..." onkeyup="filtrarUsuarios()">
+
+                <button class="btn-secondary" onclick="cargarUsuarios()">Actualizar</button>
+
+                <div id="listaUsuarios"></div>
+            </div>
+
+            <!-- MEMBRESÍA -->
+            <div id="membresia" class="section hidden">
+                <h2>Asignar Membresía</h2>
+
+                <div class="search-box">
+                    <input type="text" id="buscar_doc" placeholder="Documento">
+                    <button onclick="buscarUsuario()">Buscar</button>
+                </div>
+
+                <p id="nombre_usuario"></p>
+                <input type="hidden" id="persona_id">
+
+                <select id="tipo_membresia" onchange="toggleDias()">
+                    <option value="mensual">Mensual</option>
+                    <option value="chequera">Chequera</option>
+                </select>
+
+                <input type="number" id="dias" placeholder="Cantidad de días" style="display:none">
+
+                <input type="date" id="fecha_inicio">
+
+                <button onclick="guardarMembresia()">Guardar</button>
+
+                <input type="file" id="file">
+                <button onclick="subirComprobante()">Subir comprobante</button>
+            </div>
+
+            <!-- CONSULTA -->
+            <div id="consulta" class="section hidden">
+                <h2>Consultar Usuario</h2>
+
+                <div class="search-box">
+                    <input type="text" id="doc_consulta" placeholder="Documento">
+                    <button onclick="consultarUsuario()">Consultar</button>
+                </div>
+
+                <div id="resultadoConsulta"></div>
+            </div>
+
+            <!-- INGRESO -->
+            <div id="ingreso" class="section hidden">
+                <h2>Registrar Ingreso</h2>
+
+                <div class="search-box">
+                    <input type="text" id="doc_ingreso" placeholder="Documento del usuario">
+                    <button onclick="registrarIngreso()">Ingresar</button>
+                </div>
+            </div>
+
+        </main>
+
+    </div>
+
+    <!-- 🔔 TOAST -->
+    <div id="toast"></div>
+
+    <!-- 🔹 SCRIPTS -->
+    <script src="admin.js"></script>
+
+    <script>
+        // 🔹 NAVEGACIÓN
+        function mostrar(seccion, btn) {
+            document.querySelectorAll('.section').forEach(s => s.classList.add('hidden'));
+            document.getElementById(seccion).classList.remove('hidden');
+
+            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+
+            if (seccion === "dashboard") {
+                cargarDashboard();
+            }
+        }
+
+        // 🔹 LOGOUT
+        function logout() {
+            localStorage.clear();
+            window.location.href = "index.html";
+        }
+
+        // 🔹 MODO CLARO/OSCURO
+        function toggleModo() {
+            document.body.classList.toggle("light");
+        }
+
+        // 🔹 INICIO AUTOMÁTICO
+        window.onload = () => {
+            mostrar('dashboard', document.querySelector('.nav-btn'));
+        };
+    </script>
+
+</body>
+
+</html>

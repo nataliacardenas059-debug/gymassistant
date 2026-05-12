@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="es">
+<script>
+    const rol = localStorage.getItem("rol");
+
+    if (!rol) {
+        window.location.href = "index.html";
+    }
+</script>
+
+<head>
+    <meta charset="UTF-8">
+    <title>Mi Cuenta</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+
+    <div class="layout">
+
+        <!-- 🔹 SIDEBAR -->
+        <aside class="sidebar" id="sidebar">
+            <h2>🏋️ GymAssistant</h2>
+
+            <button class="nav-btn active" onclick="mostrarUser('inicio', this)">🏠 Inicio</button>
+            <button class="nav-btn" onclick="mostrarUser('membresia', this)">💳 Mi Membresía</button>
+
+            <button onclick="toggleModo()">🌙 Modo</button>
+
+            <div class="logout">
+                <button onclick="logout()">Cerrar sesión</button>
+            </div>
+        </aside>
+
+        <!-- 🔹 CONTENIDO -->
+        <main class="main">
+
+            <h1>Mi Cuenta</h1>
+
+            <!-- INICIO -->
+            <div id="inicio" class="section">
+                <h2>Bienvenido</h2>
+                <p>Consulta tu estado en el gimnasio</p>
+            </div>
+
+            <!-- MEMBRESÍA -->
+            <div id="membresia" class="section hidden">
+                <h2>Mi Membresía</h2>
+                <div id="info"></div>
+            </div>
+
+        </main>
+
+    </div>
+
+    <script>
+        const id = localStorage.getItem("id");
+
+        // 🔹 CARGAR MEMBRESÍA
+        function formatearFecha(fecha) {
+            if (!fecha) return "N/A";
+
+            const f = new Date(fecha);
+
+            return f.toLocaleDateString("es-CO", {
+                year: "numeric",
+                month: "long",
+                day: "numeric"
+            });
+        }
+
+        function calcularDiasRestantes(fechaFin) {
+            if (!fechaFin) return null;
+
+            const hoy = new Date();
+            const fin = new Date(fechaFin);
+
+            const diff = Math.ceil((fin - hoy) / (1000 * 60 * 60 * 24));
+
+            return diff;
+        }
+
+        function cargarMembresia() {
+            const id = localStorage.getItem("id");
+
+            fetch('/api/membresias/' + id)
+                .then(res => res.json())
+                .then(data => {
+
+                    const contenedor = document.getElementById("info");
+
+                    if (data.mensaje) {
+                        contenedor.innerHTML = `<p>${data.mensaje}</p>`;
+                        return;
+                    }
+
+                    let color = "#ffc107";
+                    if (data.estado === "Activa") color = "#22c55e";
+                    if (data.estado === "Inactiva") color = "#ef4444";
+
+                    let extraInfo = "";
+
+                    // 🔥 MENSUAL → días restantes
+                    if (data.fecha_fin) {
+                        const dias = calcularDiasRestantes(data.fecha_fin);
+
+                        if (dias > 0) {
+                            extraInfo += `<p>⏳ Te quedan <strong>${dias}</strong> días</p>`;
+                        } else {
+                            extraInfo += `<p style="color:#ef4444;">Membresía vencida</p>`;
+                        }
+                    }
+
+                    // 🔥 CHEQUERA → días disponibles
+                    if (data.dias_restantes !== undefined && data.dias_restantes !== null) {
+                        extraInfo += `<p>🎟️ Días disponibles: <strong>${data.dias_restantes}</strong></p>`;
+                    }
+
+                    contenedor.innerHTML = `
+                <div class="card-user" style="border-left:5px solid ${color}">
+                    <p><strong>Estado:</strong> <span style="color:${color}">${data.estado}</span></p>
+
+                    <p><strong>Inicio:</strong> ${formatearFecha(data.fecha_inicio)}</p>
+                    <p><strong>Fin:</strong> ${formatearFecha(data.fecha_fin)}</p>
+
+                    ${extraInfo}
+
+                    ${data.comprobante
+                            ? `<a class="btn-secondary" href="/uploads/${data.comprobante}" target="_blank">📄 Ver comprobante</a>`
+                            : ""}
+                </div>
+            `;
+                });
+        }
+        // 🔹 NAV
+        function mostrarUser(seccion, btn) {
+            document.querySelectorAll('.section').forEach(s => s.classList.add('hidden'));
+            document.getElementById(seccion).classList.remove('hidden');
+
+            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+
+            if (seccion === "membresia") {
+                cargarMembresia();
+            }
+        }
+
+        // 🔹 LOGOUT
+        function logout() {
+            localStorage.clear();
+            window.location.href = "index.html";
+        }
+
+        // 🔹 MODO
+        function toggleModo() {
+            document.body.classList.toggle("light");
+        }
+
+        // 🔹 INIT
+        window.onload = () => {
+            mostrarUser('inicio', document.querySelector('.nav-btn'));
+        };
+    </script>
+
+</body>
+
+</html>

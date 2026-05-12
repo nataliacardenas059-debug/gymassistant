@@ -1,0 +1,627 @@
+/* ===== VARIABLES (PALETA PREMIUM) ===== */
+:root {
+    --bg: #0f172a;
+    --card: #111827;
+    --sidebar: #020617;
+    --primary: #2563eb;
+    --primary-soft: #3b82f6;
+    --accent: #93c5fd;
+    --text: #e2e8f0;
+    --muted: #94a3b8;
+}
+
+/* MODO CLARO */
+.light {
+    --bg: #f1f5f9;
+    --card: #ffffff;
+    --sidebar: #e2e8f0;
+    --primary: #2563eb;
+    --primary-soft: #60a5fa;
+    --accent: #bfdbfe;
+    --text: #000000;
+    --muted: #000000;
+}
+
+/* ===== BASE ===== */
+body {
+    margin: 0;
+    font-family: 'Segoe UI', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+}
+
+/* ===== LAYOUT ===== */
+.layout {
+    display: flex;
+    align-items: flex-start;
+}
+
+/* ===== SIDEBAR ===== */
+.sidebar {
+    width: 240px;
+    min-height: 100vh;
+    height: auto;
+    background: var(--sidebar);
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    transition: 0.3s;
+    z-index: 1000;
+}
+
+.sidebar {
+    position: sticky;
+    top: 0;
+}
+
+.sidebar {
+    box-shadow: 4px 0 15px rgba(0, 0, 0, 0.3);
+}
+
+/* CUANDO ESTÁ ACTIVO */
+.sidebar.active {
+    left: 0;
+}
+
+/* BOTON TOGGLE */
+.menu-toggle {
+    position: fixed;
+    top: 15px;
+    left: 15px;
+    background: var(--primary);
+    color: white;
+    border: none;
+    padding: 10px;
+    border-radius: 8px;
+    z-index: 1100;
+    cursor: pointer;
+    width: 50px;
+    height: 50px;
+}
+
+.menu-toggle:hover {
+    background: #2563eb;
+}
+
+.menu-toggle:focus {
+    outline: none;
+}
+
+.menu-toggle:active {
+    background: #3b82f6;
+}
+
+/* BOTONES MENU */
+.nav-btn {
+    background: transparent;
+    border: none;
+    color: var(--muted);
+    padding: 12px;
+    text-align: left;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.nav-btn:hover {
+    background: var(--accent);
+    color: var(--text);
+}
+
+.nav-btn.active {
+    background: var(--primary);
+    color: white;
+}
+
+/* LOGOUT */
+.logout {
+    margin-top: auto;
+}
+
+.logout button {
+    background: #ef4444;
+    width: 100%;
+    color: white;
+}
+
+.logout button:hover {
+    background: #dc2626;
+}
+
+/* ===== MAIN ===== */
+.main {
+    flex: 1;
+    padding: 30px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    /* 🔥 CENTRADO */
+}
+
+/* ===== SECCIONES ===== */
+.section {
+    width: 100%;
+    max-width: 700px;
+    background: var(--card);
+    padding: 25px;
+    border-radius: 14px;
+    margin-bottom: 20px;
+    animation: fadeIn 0.3s ease;
+}
+
+/* ===== GRID ===== */
+.grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+}
+
+/* ===== INPUTS ===== */
+input,
+select {
+    width: 100%;
+    padding: 12px;
+    border-radius: 10px;
+    border: none;
+    background: #1e293b;
+    color: white;
+}
+
+.light input,
+.light select {
+    background: #e2e8f0;
+    color: black;
+}
+
+/* FOCUS */
+input:focus,
+select:focus {
+    outline: 2px solid var(--primary);
+}
+
+/* ===== BOTONES ===== */
+button {
+    padding: 12px;
+    border-radius: 10px;
+    border: none;
+    cursor: pointer;
+    margin-top: 10px;
+    transition: 0.2s;
+}
+
+/* PRINCIPAL */
+.btn-primary {
+    background: var(--primary);
+    color: white;
+}
+
+.btn-primary:hover {
+    background: var(--primary-soft);
+}
+
+/* SECUNDARIO */
+.btn-secondary {
+    background: #334155;
+    color: white;
+}
+
+/* ===== SEARCH ===== */
+.search-box {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 15px;
+}
+
+.search-box input {
+    flex: 1;
+}
+
+/* ===== DASHBOARD ===== */
+.cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 15px;
+}
+
+.card {
+    background: var(--card);
+    padding: 20px;
+    border-radius: 12px;
+    text-align: center;
+}
+
+/* ===== LISTA ===== */
+.usuario-card {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #1e293b;
+    padding: 12px;
+    border-radius: 10px;
+    margin-top: 10px;
+}
+
+/* ===== HIDDEN ===== */
+.hidden {
+    display: none;
+}
+
+/* ===== TOAST ===== */
+#toast {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background: var(--primary);
+    color: white;
+    padding: 12px 18px;
+    border-radius: 10px;
+    display: none;
+}
+
+/* ===== ANIMACIÓN ===== */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* ===== RESPONSIVE 🔥 ===== */
+@media (max-width: 768px) {
+
+    /* BOTÓN MENU */
+    .menu-toggle {
+        display: block;
+    }
+
+    /* SIDEBAR MODO APP */
+    .sidebar {
+        position: fixed;
+        left: -250px;
+        top: 0;
+        width: 240px;
+        height: 100%;
+        z-index: 1000;
+    }
+
+    .sidebar.active {
+        left: 0;
+    }
+
+    /* CONTENIDO */
+    .main {
+        padding: 15px;
+    }
+
+    /* GRID RESPONSIVE */
+    .grid {
+        grid-template-columns: 1fr;
+    }
+
+    /* SEARCH */
+    .search-box {
+        flex-direction: column;
+    }
+
+    button {
+        width: 100%;
+    }
+}
+
+.menu-toggle {
+    display: none;
+    position: fixed;
+    top: 15px;
+    left: 15px;
+    background: var(--primary);
+    color: white;
+    padding: 10px;
+    border-radius: 8px;
+    z-index: 1000;
+}
+
+@media (max-width: 768px) {
+    .menu-toggle {
+        display: block;
+    }
+
+    .sidebar {
+        position: fixed;
+        left: -100%;
+        top: 0;
+        height: 100%;
+        width: 220px;
+        z-index: 999;
+    }
+
+    .sidebar.active {
+        left: 0;
+    }
+}
+
+/* MODO CLARO */
+.light .section {
+    background: white;
+    color: black;
+}
+
+/* USUARIOS */
+.light .usuario-card {
+    background: #f1f5f9;
+    color: black;
+}
+
+/* CONSULTA */
+.light #resultadoConsulta div {
+    background: #f1f5f9;
+    color: black;
+}
+
+/* INPUTS */
+.light input,
+.light select {
+    background: #e2e8f0;
+    color: black;
+}
+
+/* DASHBOARD */
+.light .card {
+    background: #f8fafc;
+    color: black;
+}
+
+.section h2 {
+    margin-bottom: 15px;
+}
+
+.section p {
+    margin: 8px 0;
+}
+
+/* ===== CONSULTA USUARIO ===== */
+.consulta-card {
+    background: #1e293b;
+    border-radius: 12px;
+    padding: 15px;
+    margin-top: 12px;
+    border-left: 5px solid transparent;
+    transition: 0.2s;
+}
+
+.consulta-card:hover {
+    transform: scale(1.01);
+}
+
+/* TEXTO */
+.consulta-card .nombre {
+    font-weight: bold;
+    font-size: 16px;
+}
+
+.consulta-card .estado {
+    font-weight: bold;
+    margin-top: 5px;
+}
+
+/* ===== ESTADOS ===== */
+.estado-activa {
+    border-left-color: #22c55e;
+}
+
+.estado-activa .estado {
+    color: #22c55e;
+}
+
+.estado-inactiva {
+    border-left-color: #ef4444;
+}
+
+.estado-inactiva .estado {
+    color: #ef4444;
+}
+
+.estado-sin {
+    border-left-color: #facc15;
+}
+
+.estado-sin .estado {
+    color: #facc15;
+}
+
+/* DEFAULT */
+.estado-default {
+    border-left-color: #94a3b8;
+}
+
+/* MENSAJE VACÍO */
+.empty {
+    text-align: center;
+    color: #94a3b8;
+}
+
+/* ===== MODO CLARO ===== */
+.light .consulta-card {
+    background: #f1f5f9;
+    color: black;
+}
+
+.light .estado-activa .estado {
+    color: #16a34a;
+}
+
+.light .estado-inactiva .estado {
+    color: #dc2626;
+}
+
+.light .estado-sin .estado {
+    color: #ca8a04;
+}
+
+.usuario-card {
+    background: var(--card-bg);
+    padding: 15px;
+    border-radius: 10px;
+    margin-top: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.usuario-card button {
+    background: #ef4444;
+    color: white;
+    border-radius: 6px;
+}
+
+.usuario-card button:hover {
+    background: #dc2626;
+}
+
+/* MODO CLARO */
+.light .usuario-card {
+    background: #f1f5f9;
+    color: black;
+}
+
+/* TARJETAS CONSULTA */
+.card-estado {
+    padding: 15px;
+    border-radius: 10px;
+    margin-top: 10px;
+    background: #1e293b;
+}
+
+/* BADGES */
+.badge {
+    display: inline-block;
+    padding: 5px 10px;
+    border-radius: 6px;
+    font-weight: bold;
+    margin-top: 5px;
+}
+
+/* ESTADOS */
+.estado-activa {
+    background: #22c55e;
+    color: black;
+}
+
+.estado-inactiva {
+    background: #ef4444;
+    color: white;
+}
+
+.estado-warning {
+    background: #facc15;
+    color: black;
+}
+
+/*  MODO CLARO */
+.light .card-estado {
+    background: #f1f5f9;
+    color: black;
+}
+
+.light .badge {
+    opacity: 0.9;
+}
+
+/* LOGIN */
+.login-body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
+
+.login-wrapper {
+    width: 100%;
+    max-width: 350px;
+    padding: 20px;
+}
+
+.login-card {
+    background: #1e293b;
+    padding: 30px;
+    border-radius: 16px;
+    text-align: center;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+}
+
+.login-card input {
+    margin-top: 15px;
+}
+
+.login-card button {
+    width: 100%;
+    margin-top: 15px;
+}
+
+#error {
+    color: #ef4444;
+    margin-top: 10px;
+}
+
+/* MODO CLARO LOGIN */
+.light .login-card {
+    background: white;
+}
+
+/*Uusario html*/
+/* TARJETA USUARIO */
+.card-user {
+    background: #1e293b;
+    padding: 15px;
+    border-radius: 10px;
+    margin-top: 10px;
+}
+
+/* MODO CLARO */
+.light .card-user {
+    background: #f1f5f9;
+}
+
+@media (max-width: 768px) {
+
+    .sidebar {
+        position: fixed;
+        left: -250px;
+        top: 0;
+        height: 100%;
+        z-index: 1000;
+        transition: 0.3s;
+    }
+
+    .sidebar.active {
+        left: 0;
+    }
+
+    .main {
+        padding: 20px;
+    }
+
+}
+
+.card-user {
+    background: #1e293b;
+    padding: 15px;
+    border-radius: 12px;
+    margin-top: 10px;
+    line-height: 1.6;
+}
+
+.card-user a {
+    display: inline-block;
+    margin-top: 10px;
+}
+
+/* MODO CLARO */
+.light .card-user {
+    background: #f1f5f9;
+    color: black;
+}
