@@ -190,4 +190,54 @@ router.delete('/:id', (req, res) => {
     });
 });
 
+/* =========================
+   EDITAR USUARIO
+========================= */
+
+router.put('/:id', (req, res) => {
+
+    const id = req.params.id;
+
+    const {
+        nombre_completo,
+        numero_documento,
+        tipo_documento,
+        tipo_persona
+    } = req.body;
+
+    db.query(`
+    
+        UPDATE personas
+        SET
+            nombre_completo = ?,
+            numero_documento = ?,
+            tipo_documento = ?,
+            tipo_persona = ?
+        WHERE id = ?
+    
+    `, [
+
+        nombre_completo,
+        numero_documento,
+        tipo_documento,
+        tipo_persona,
+        id
+
+    ], (err) => {
+
+        if (err) {
+
+            console.error(err);
+
+            return res.status(500).json({
+                mensaje: 'Error al actualizar usuario'
+            });
+        }
+
+        res.json({
+            mensaje: '✅ Usuario actualizado correctamente'
+        });
+    });
+});
+
 module.exports = router;

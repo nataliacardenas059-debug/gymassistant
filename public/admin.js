@@ -1,319 +1,449 @@
-// 🔹 REGISTRAR PERSONA
-document.getElementById("formPersona").addEventListener("submit", async (e) => {
-    e.preventDefault();
-    const tipoPersona = document.getElementById("tipo_persona").value;
-
-    const data = {
-        nombre_completo: document.getElementById("nombre").value,
-        numero_documento: document.getElementById("documento").value,
-        tipo_documento: document.getElementById("tipo_doc").value,
-        tipo_persona: tipoPersona
-    };
-
-    if (tipoPersona === "profesor") {
-        data.tipo_profesor = document.getElementById("tipo_profesor").value;
-        data.horas_semana = parseInt(document.getElementById("horas_semana").value) || 0;
-    }
-
-    const res = await fetch("/api/personas", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data)
-    });
-
-    const result = await res.json();
-    alert("✅ " + result.mensaje);
-
-    document.getElementById("formPersona").reset();
-});
-
-
-// 🔹 LISTAR USUARIOS
-async function cargarUsuarios() {
-
-    const res = await fetch("/api/personas");
-    const data = await res.json();
-
-    const contenedor = document.getElementById("listaUsuarios");
-    contenedor.innerHTML = "";
-
-    data.forEach(u => {
-        contenedor.innerHTML += `
-                <div style="margin-top:10px; padding:10px; background:#2c2c2c; border-radius:8px;">
-        <strong>${u.nombre_completo}</strong><br>
-        Documento: ${u.numero_documento}<br>
-        Tipo: ${u.tipo_persona}
-    </div>
-            `;
-    });
-}
-
-
-// 🔹 BUSCAR USUARIO PARA MEMBRESÍA
-async function buscarUsuario() {
-    const doc = document.getElementById("buscar_doc").value;
-
-    if (!doc) {
-        mostrarToast(result.mensaje);
-        return;
-    }
-
-    const res = await fetch(`/api/personas/${doc}`);
-    const data = await res.json();
-
-    if (!data || !data.id) {
-        mostrarToast(result.mensaje);;
-        return;
-    }
-
-    document.getElementById("persona_id").value = data.id;
-    document.getElementById("nombre_usuario").innerText = data.nombre_completo;
-}
-
-
-// 🔹 GUARDAR MEMBRESÍA
-async function guardarMembresia() {
-
-    const data = {
-        persona_id: document.getElementById("persona_id").value,
-        tipo: document.getElementById("tipo_membresia").value,
-        fecha_inicio: document.getElementById("fecha_inicio").value,
-        dias: document.getElementById("dias").value
-    };
-
-    const res = await fetch("/api/membresias", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data)
-    });
-
-    const result = await res.json();
-    alert(result.mensaje);
-}
-
-
-// 🔹 CONSULTAR USUARIO
-async function consultarUsuario() {
-    const doc = document.getElementById("doc_consulta").value;
-
-    if (!doc) return mostrarToast("Ingresa documento");
-
-    const res = await fetch(`/api/membresias/consulta/${doc}`);
-    const data = await res.json();
-
-    const contenedor = document.getElementById("resultadoConsulta");
-    contenedor.innerHTML = "";
-
-    if (!data.length) {
-        contenedor.innerHTML = `<p class="empty">No se encontró información</p>`;
-        return;
-    }
-
-    data.forEach(d => {
-
-        let estadoClase = "estado-warning";
-
-        if (d.estado === "Activa") estadoClase = "estado-activa";
-        if (d.estado === "Inactiva") estadoClase = "estado-inactiva";
-
-        contenedor.innerHTML += `
-    <div class="card-estado">
-        <p><strong>${d.nombre_completo}</strong></p>
-        <p>Documento: ${d.numero_documento}</p>
-        <p>Tipo: ${d.tipo_persona}</p>
-
-        <span class="badge ${estadoClase}">
-            ${d.estado}
-        </span>
-    </div>
-    `;
-    });
-}
-
-//Dashboard
-async function cargarDashboard() {
-    const res = await fetch("/api/personas");
-    const usuarios = await res.json();
-
-    document.getElementById("totalUsuarios").innerText = usuarios.length;
-
-    const res2 = await fetch("/api/membresias");
-    const membresias = await res2.json();
-
-    const hoy = new Date();
-
-    const activas = membresias.filter(m => {
-        return new Date(m.fecha_inicio) <= hoy && new Date(m.fecha_fin) >= hoy;
-    });
-
-    document.getElementById("membresiasActivas").innerText = activas.length;
-}
-
-//Toast
-function mostrarToast(msg) {
-    const toast = document.getElementById("toast");
-
-    toast.innerText = msg;
-    toast.style.display = "block";
-
-    setTimeout(() => {
-        toast.style.display = "none";
-    }, 3000);
-}
-
-//Filtrar Usuarios
 let usuariosGlobal = [];
 
-async function cargarUsuarios() {
-    const res = await fetch("/api/personas");
-    const data = await res.json();
+/* =========================
+   MODULOS
+========================= */
 
-    const contenedor = document.getElementById("listaUsuarios");
-    contenedor.innerHTML = "";
+function mostrarModulo(id) {
 
-    data.forEach(u => {
-        contenedor.innerHTML += `
-        <div class="usuario-card">
-            <p><strong>${u.nombre_completo}</strong></p>
-            <p>${u.numero_documento} - ${u.tipo_persona}</p>
-
-            <button onclick="eliminarUsuario(${u.id}, '${u.nombre_completo}', '${u.numero_documento}')">
-                Eliminar
-            </button>
-        </div>
-        `;
+    document.querySelectorAll(".modulo").forEach(modulo => {
+        modulo.classList.remove("activo");
     });
+
+    document.getElementById(id).classList.add("activo");
+
+    document.querySelectorAll(".menu-btn").forEach(btn => {
+        btn.classList.remove("active");
+    });
+
+    event.target.classList.add("active");
 }
+
+/* =========================
+   CARGAR USUARIOS
+========================= */
+
+async function cargarUsuarios() {
+
+    try {
+
+        const res = await fetch("/api/personas");
+        const data = await res.json();
+
+        usuariosGlobal = data;
+
+        renderUsuarios(data);
+
+    } catch (error) {
+
+        console.error(error);
+    }
+}
+
+/* =========================
+   RENDER TABLA
+========================= */
 
 function renderUsuarios(lista) {
-    const contenedor = document.getElementById("listaUsuarios");
-    contenedor.innerHTML = "";
+
+    const tabla = document.getElementById("tablaUsuarios");
+
+    tabla.innerHTML = "";
 
     lista.forEach(u => {
-        contenedor.innerHTML += `
-        <div class="usuario-card">
-            <strong>${u.nombre_completo}</strong><br>
-            ${u.numero_documento} - ${u.tipo_persona}   
-            <button class="boton-eliminar" 
-            onclick="eliminarUsuario(${u.id}, '${u.nombre_completo}', '${u.numero_documento}')">
-                Eliminar
-            </button>
-        </div>
+
+        tabla.innerHTML += `
+        
+        <tr>
+
+            <td>${u.nombre_completo}</td>
+
+            <td>${u.numero_documento}</td>
+
+            <td>${u.tipo_persona}</td>
+
+            <td>${u.correo || "Sin correo"}</td>
+
+            <td>${u.estado}</td>
+
+            <td>
+
+                <button onclick="editarUsuario(${u.id})">
+                    Editar
+                </button>
+
+                <button 
+                    class="btn-danger"
+                    onclick="eliminarUsuario(${u.id})"
+                >
+                    Eliminar
+                </button>
+
+            </td>
+
+        </tr>
         `;
     });
 }
 
-function filtrarUsuarios() {
-    const texto = document.getElementById("buscador").value.toLowerCase();
+/* =========================
+   FILTRAR
+========================= */
 
-    const filtrados = usuariosGlobal.filter(u =>
-        u.nombre_completo.toLowerCase().includes(texto) ||
-        u.numero_documento.includes(texto)
-    );
+function filtrarUsuarios() {
+
+    const texto = document
+        .getElementById("buscadorUsuarios")
+        .value
+        .toLowerCase();
+
+    const filtrados = usuariosGlobal.filter(u => {
+
+        return (
+            u.nombre_completo.toLowerCase().includes(texto) ||
+            u.numero_documento.includes(texto)
+        );
+    });
 
     renderUsuarios(filtrados);
 }
 
-//modo
-function toggleModo() {
-    document.body.classList.toggle("light");
-}
+/* =========================
+   ELIMINAR
+========================= */
 
-// ELIMINAR USUARIO
-async function eliminarUsuario(id, nombre, documento) {
+async function eliminarUsuario(id) {
 
-    const confirmar = confirm(`¿Eliminar a ${nombre}?\nDocumento: ${documento}`);
+    const confirmar = confirm("¿Eliminar usuario del sistema?");
 
     if (!confirmar) return;
 
-    const res = await fetch(`/api/personas/${id}`, {
-        method: "DELETE"
-    });
+    try {
 
-    const data = await res.json();
+        const res = await fetch(`/api/personas/${id}`, {
+            method: "DELETE"
+        });
 
-    mostrarToast(data.mensaje);
+        const data = await res.json();
 
-    cargarUsuarios();
+        alert(data.mensaje);
+
+        cargarUsuarios();
+
+    } catch (error) {
+
+        console.error(error);
+    }
 }
 
-// REGISTRAR INGRESO
-async function registrarIngreso() {
-    const doc = document.getElementById("doc_ingreso").value;
+/* =========================
+   EDITAR
+========================= */
 
-    if (!doc) return mostrarToast("Ingresa documento");
+let editandoId = null;
+
+function abrirModalUsuario() {
+
+    document
+        .getElementById("modalUsuario")
+        .classList.add("active");
+
+    limpiarFormulario();
+
+    cambiarCamposPersona();
+}
+
+function cerrarModalUsuario() {
+
+    document
+        .getElementById("modalUsuario")
+        .classList.remove("active");
+}
+
+function cambiarCamposPersona() {
+
+    const tipo = document.getElementById("tipoPersona").value;
+
+    const divProfesor = document.getElementById("camposProfesor");
+
+    if (tipo === "profesor") {
+
+        divProfesor.style.display = "grid";
+
+    } else {
+
+        divProfesor.style.display = "none";
+    }
+}
+
+function limpiarFormulario() {
+
+    editandoId = null;
+
+    document.getElementById("tituloModal").textContent =
+        "Nuevo Usuario";
+
+    document.getElementById("nombreCompleto").value = "";
+
+    document.getElementById("numeroDocumento").value = "";
+
+    document.getElementById("tipoDocumento").value = "CC";
+
+    document.getElementById("tipoPersona").value = "estudiante";
+
+    document.getElementById("tipoProfesor").value = "vinculado";
+
+    document.getElementById("horasSemana").value = 0;
+}
+
+async function guardarUsuario() {
 
     try {
-        const res = await fetch(`/api/membresias/ingreso/${doc}`, {
+
+        const body = {
+
+            nombre_completo:
+                document.getElementById("nombreCompleto").value,
+
+            numero_documento:
+                document.getElementById("numeroDocumento").value,
+
+            tipo_documento:
+                document.getElementById("tipoDocumento").value,
+
+            tipo_persona:
+                document.getElementById("tipoPersona").value,
+
+            tipo_profesor:
+                document.getElementById("tipoProfesor").value,
+
+            horas_semana:
+                document.getElementById("horasSemana").value
+        };
+
+        let url = "/api/personas";
+        let method = "POST";
+
+        if (editandoId) {
+
+            url = `/api/personas/${editandoId}`;
+
+            method = "PUT";
+        }
+
+        const res = await fetch(url, {
+
+            method,
+
+            headers: {
+                "Content-Type": "application/json"
+            },
+
+            body: JSON.stringify(body)
+        });
+
+        const data = await res.json();
+
+        alert(data.mensaje);
+
+        cerrarModalUsuario();
+
+        cargarUsuarios();
+
+    } catch (error) {
+
+        console.error(error);
+    }
+}
+
+/* =========================
+   CREAR MEMBRESIA
+========================= */
+
+async function crearMembresia() {
+
+    try {
+
+        const documento = document.getElementById("docMembresia").value;
+
+        const personaRes = await fetch(`/api/personas/${documento}`);
+
+        const persona = await personaRes.json();
+
+        if (!persona) {
+            return alert("Usuario no encontrado");
+        }
+
+        const body = {
+
+            persona_id: persona.id,
+
+            tipo: document.getElementById("tipoMembresia").value,
+
+            fecha_inicio: document.getElementById("fechaInicio").value,
+
+            dias: document.getElementById("diasChequera").value
+        };
+
+        const res = await fetch("/api/membresias", {
+
+            method: "POST",
+
+            headers: {
+                "Content-Type": "application/json"
+            },
+
+            body: JSON.stringify(body)
+        });
+
+        const data = await res.json();
+
+        alert(data.mensaje);
+
+    } catch (error) {
+
+        console.error(error);
+    }
+}
+
+/* =========================
+   CONSULTAR ACCESO
+========================= */
+
+async function consultarAcceso() {
+
+    try {
+
+        const documento = document.getElementById("docAcceso").value;
+
+        const res = await fetch(`/api/acceso/consulta/${documento}`);
+
+        const data = await res.json();
+
+        const div = document.getElementById("resultadoAcceso");
+
+        div.innerHTML = `
+        
+        <div class="resultado-card">
+
+            <h2>${data.nombre || "Usuario"}</h2>
+
+            <p>
+                Documento:
+                ${data.documento || ""}
+            </p>
+
+            <p>
+                Tipo:
+                ${data.tipo_persona || ""}
+            </p>
+
+            <p class="${data.permitido ? 'estado-ok' : 'estado-error'}">
+                ${data.mensaje}
+            </p>
+
+            <button onclick="registrarIngreso('${documento}')">
+                Registrar ingreso
+            </button>
+
+            <button 
+                class="btn-danger"
+                onclick="registrarSalida('${documento}')"
+            >
+                Registrar salida
+            </button>
+
+        </div>
+        `;
+
+    } catch (error) {
+
+        console.error(error);
+    }
+}
+
+/* =========================
+   REGISTRAR INGRESO
+========================= */
+
+async function registrarIngreso(documento) {
+
+    try {
+
+        const res = await fetch(`/api/acceso/ingresar/${documento}`, {
+
             method: "POST"
         });
 
         const data = await res.json();
-        if (!res.ok) throw new Error(data.mensaje);
 
-        mostrarToast(data.mensaje);
+        alert(data.mensaje);
+
+        consultarAcceso();
+
+        cargarAforo();
 
     } catch (error) {
-        mostrarToast(error.message);
-    }
-}
-//descontar dias
-function toggleDias() {
-    const tipo = document.getElementById("tipo_membresia").value;
-    document.getElementById("dias").style.display =
-        tipo === "chequera" ? "block" : "none";
-}
 
-function toggleMenu() {
-    document.querySelector(".sidebar").classList.toggle("active");
-}
-
-//Mostrar secciones
-function mostrar(seccion, btn) {
-    document.querySelectorAll('.section').forEach(s => s.classList.add('hidden'));
-    document.getElementById(seccion).classList.remove('hidden');
-
-    document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
-
-    // 🔥 CERRAR MENÚ AUTOMÁTICO
-    document.querySelector('.sidebar').classList.remove('active');
-
-    if (seccion === "dashboard") {
-        cargarDashboard();
+        console.error(error);
     }
 }
 
-//Subir comprobante
-async function subirComprobante() {
-    const fileInput = document.getElementById("file");
-    const membresiaId = document.getElementById("persona_id").value;
+/* =========================
+   REGISTRAR SALIDA
+========================= */
 
-    if (!fileInput.files.length) return mostrarToast("Selecciona archivo");
-
-    const formData = new FormData();
-    formData.append("comprobante", fileInput.files[0]);
+async function registrarSalida(documento) {
 
     try {
-        const res = await fetch(`/api/membresias/comprobante/${membresiaId}`, {
-            method: "POST",
-            body: formData
+
+        const res = await fetch(`/api/acceso/salida/${documento}`, {
+
+            method: "POST"
         });
 
         const data = await res.json();
-        if (!res.ok) throw new Error(data.mensaje);
 
-        mostrarToast("Comprobante subido");
+        alert(data.mensaje);
+
+        consultarAcceso();
+
+        cargarAforo();
 
     } catch (error) {
-        mostrarToast(error.message);
+
+        console.error(error);
     }
 }
 
-//profesor
-function mostrarCamposProfesor() {
-    const tipo = document.getElementById("tipo_persona").value;
-    const div = document.getElementById("camposProfesor");
+/* =========================
+   AFORO
+========================= */
 
-    div.style.display = tipo === "profesor" ? "block" : "none";
+async function cargarAforo() {
+
+    try {
+
+        const res = await fetch("/api/acceso/aforo");
+
+        const data = await res.json();
+
+        document.getElementById("aforoActual").textContent =
+            data.dentro;
+
+        document.getElementById("espaciosDisponibles").textContent =
+            30 - data.dentro;
+
+    } catch (error) {
+
+        console.error(error);
+    }
 }
+
+/* =========================
+   INIT
+========================= */
+
+cargarUsuarios();
+
+cargarAforo();
