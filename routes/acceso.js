@@ -1,6 +1,31 @@
 const express = require('express');
 const router = express.Router();
 const db = require('../db');
+/* =========================
+   HORARIO ADMINISTRATIVOS
+========================= */
+
+function horarioAdministrativo() {
+
+    const ahora = new Date();
+
+    const hora = ahora.getHours();
+    const minutos = ahora.getMinutes();
+
+    const totalMin = (hora * 60) + minutos;
+
+    // 12:00 - 13:00
+    const bloque1 =
+        totalMin >= 720 &&
+        totalMin <= 780;
+
+    // 17:00 - 18:00
+    const bloque2 =
+        totalMin >= 1020 &&
+        totalMin <= 1080;
+
+    return bloque1 || bloque2;
+}
 
 /* =========================================
    FUNCIÓN CENTRAL VALIDAR INGRESO

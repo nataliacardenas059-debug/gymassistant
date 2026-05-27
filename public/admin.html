@@ -141,7 +141,7 @@
 
                         <input type="text" id="docMembresia" placeholder="Documento usuario">
 
-                        <select id="tipoMembresia">
+                        <select id="tipoMembresia" onchange="cambiarCamposMembresia()">
 
                             <option value="mensual">
                                 Mensual
@@ -155,7 +155,11 @@
 
                         <input type="date" id="fechaInicio">
 
-                        <input type="number" id="diasChequera" placeholder="Días chequera">
+                        <div id="grupoDiasChequera">
+
+                            <input type="number" id="diasChequera" placeholder="Días chequera">
+
+                        </div>
                         <input type="file" id="comprobanteArchivo" accept=".pdf,image/*">
 
                         <button onclick="crearMembresia()">

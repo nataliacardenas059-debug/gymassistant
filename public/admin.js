@@ -139,25 +139,57 @@ async function eliminarUsuario(id) {
 /* =========================
    EDITAR
 ========================= */
+function editarUsuario(id) {
+
+    const usuario =
+        usuariosGlobal.find(u => u.id === id);
+
+    if (!usuario) return;
+
+    editandoId = id;
+
+    abrirModalUsuario("editar");
+
+    document.getElementById("tituloModal").textContent =
+        "Editar Usuario";
+
+    document.getElementById("nombreCompleto").value =
+        usuario.nombre_completo;
+
+    document.getElementById("numeroDocumento").value =
+        usuario.numero_documento;
+
+    document.getElementById("tipoDocumento").value =
+        usuario.tipo_documento;
+
+    document.getElementById("tipoPersona").value =
+        usuario.tipo_persona;
+
+    cambiarCamposPersona();
+}
 
 let editandoId = null;
 
-function abrirModalUsuario() {
+function abrirModalUsuario(modo = "crear") {
 
     document
         .getElementById("modalUsuario")
         .classList.add("active");
 
-    limpiarFormulario();
+    if (modo === "crear") {
 
-    cambiarCamposPersona();
+        limpiarFormulario();
+
+        cambiarCamposPersona();
+    }
 }
 
 function cerrarModalUsuario() {
-
+    editandoId = null;
     document
         .getElementById("modalUsuario")
         .classList.remove("active");
+
 }
 
 function cambiarCamposPersona() {
@@ -547,8 +579,15 @@ function renderMembresias(lista) {
             </td>
 
             <td>
-                ${m.dias_restantes || 0}
-            </td>
+              ${m.tipo === "mensual"
+                ?
+                calcularDiasRestantes(
+                    m.fecha_fin
+                ) + " días"
+                :
+                (m.dias_restantes || 0) + " días"
+            }
+           </td>
 
             <td>
 
@@ -586,6 +625,47 @@ function formatearFecha(fecha) {
         .toLocaleDateString("es-CO");
 }
 
+function calcularDiasRestantes(fechaFin) {
+
+    if (!fechaFin) return 0;
+
+    const hoy = new Date();
+
+    const fin = new Date(fechaFin);
+
+    const diferencia =
+        fin - hoy;
+
+    const dias =
+        Math.ceil(
+            diferencia / (1000 * 60 * 60 * 24)
+        );
+
+    return dias > 0 ? dias : 0;
+}
+
+/* =========================
+   CAMPOS MEMBRESIA
+========================= */
+
+function cambiarCamposMembresia() {
+
+    const tipo =
+        document.getElementById("tipoMembresia").value;
+
+    const grupo =
+        document.getElementById("grupoDiasChequera");
+
+    if (tipo === "chequera") {
+
+        grupo.style.display = "block";
+
+    } else {
+
+        grupo.style.display = "none";
+    }
+}
+
 /* =========================
    INIT
 ========================= */
@@ -593,3 +673,5 @@ function formatearFecha(fecha) {
 cargarUsuarios();
 
 cargarAforo();
+
+cambiarCamposMembresia();
