@@ -480,3 +480,61 @@ select {
 
     flex-wrap: wrap;
 }
+
+/* =========================
+   SUBMODULOS MEMBRESIAS
+========================= */
+
+.submodulo-membresia {
+
+    display: none;
+
+    margin-top: 25px;
+}
+
+.activo-sub {
+
+    display: block;
+}
+
+/* =========================
+   TABLA MEMBRESIAS
+========================= */
+
+.estado-activa {
+
+    color: var(--success);
+    font-weight: bold;
+}
+
+.estado-vencida {
+
+    color: var(--danger);
+    font-weight: bold;
+}
+
+.estado-beneficio {
+
+    color: var(--primary);
+    font-weight: bold;
+}
+
+.comprobante-btn {
+
+    text-decoration: none;
+
+    background: var(--primary);
+
+    color: white;
+
+    padding: 8px 12px;
+
+    border-radius: 8px;
+
+    display: inline-block;
+}
+
+.comprobante-btn:hover {
+
+    opacity: 0.9;
+}

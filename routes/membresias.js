@@ -1,6 +1,45 @@
 const express = require('express');
 const router = express.Router();
 const db = require('../db');
+const multer = require('multer');
+
+/* =========================
+   MULTER
+========================= */
+
+const storage = multer.diskStorage({
+
+    destination: 'uploads/',
+
+    filename: (req, file, cb) => {
+
+        cb(null, Date.now() + "-" + file.originalname);
+    }
+});
+
+const upload = multer({
+
+    storage,
+
+    fileFilter: (req, file, cb) => {
+
+        const tipos = [
+
+            "image/jpeg",
+            "image/png",
+            "application/pdf"
+        ];
+
+        if (tipos.includes(file.mimetype)) {
+
+            cb(null, true);
+
+        } else {
+
+            cb(new Error("Archivo no permitido"));
+        }
+    }
+});
 
 function actualizarEstadoMembresias() {
     db.query(`
@@ -23,7 +62,6 @@ function actualizarEstadoMembresias() {
     });
 }
 
-const multer = require('multer');
 
 router.get('/historial/:id', (req, res) => {
 
@@ -43,35 +81,74 @@ router.get('/historial/:id', (req, res) => {
     });
 });
 
-/* ================== MULTER ================== */
-const storage = multer.diskStorage({
-    destination: 'uploads/',
-    filename: (req, file, cb) => {
-        cb(null, Date.now() + "-" + file.originalname);
-    }
-});
-
-const upload = multer({
-    storage,
-    fileFilter: (req, file, cb) => {
-        const tipos = ["image/jpeg", "image/png", "application/pdf"];
-        if (tipos.includes(file.mimetype)) cb(null, true);
-        else cb(new Error("Archivo no permitido"));
-    }
-});
-
-/* ================== OBTENER ================== */
+/* ================== LISTAR MEMBRESIAS ================== */
 router.get('/', (req, res) => {
-    db.query('SELECT * FROM membresias', (err, results) => {
-        if (err) return res.status(500).json({ mensaje: 'Error al obtener membresías' });
+
+    actualizarEstadoMembresias();
+
+    db.query(`
+    
+        SELECT
+        
+            m.*,
+
+            p.nombre_completo,
+            p.numero_documento,
+            p.tipo_persona,
+
+            CASE
+
+                WHEN m.tipo = 'mensual'
+                     AND CURDATE()
+                     BETWEEN m.fecha_inicio
+                     AND m.fecha_fin
+
+                THEN 'activa'
+
+                WHEN m.tipo = 'chequera'
+                     AND m.dias_restantes > 0
+
+                THEN 'activa'
+
+                ELSE 'vencida'
+
+            END AS estado
+
+        FROM membresias m
+
+        INNER JOIN personas p
+            ON p.id = m.persona_id
+
+        ORDER BY m.id DESC
+    
+    `, (err, results) => {
+
+        if (err) {
+
+            console.error(err);
+
+            return res.status(500).json({
+                mensaje: 'Error al obtener membresías'
+            });
+        }
+
         res.json(results);
     });
 });
 
 /* ================== CREAR ================== */
-router.post('/', (req, res) => {
-    actualizarEstadoMembresias(); // 🔥
-    const { persona_id, tipo, fecha_inicio, dias } = req.body;
+router.post('/', upload.single('comprobante'), (req, res) => {
+    actualizarEstadoMembresias(); // 
+    const {
+        persona_id,
+        tipo,
+        fecha_inicio,
+        dias
+    } = req.body;
+
+    const comprobante = req.file
+        ? req.file.filename
+        : null;
 
     db.query(`
         SELECT * FROM membresias 
@@ -92,10 +169,13 @@ router.post('/', (req, res) => {
 
         if (tipo === 'mensual') {
             db.query(`
-                INSERT INTO membresias 
-                (persona_id, tipo, fecha_inicio, fecha_fin, estado)
-                VALUES (?, 'mensual', ?, DATE_ADD(?, INTERVAL 30 DAY), 'activa')
-            `, [persona_id, fecha_inicio, fecha_inicio], (err) => {
+            INSERT INTO membresias ( persona_id,
+            tipo,
+            fecha_inicio,
+            fecha_fin, 
+            estado,
+            comprobante)VALUES (?,'mensual',?,DATE_ADD(?, INTERVAL 30 DAY),'activa',?)
+            `, [persona_id, fecha_inicio, fecha_inicio, comprobante], (err) => {
 
                 if (err) return res.status(500).json({ mensaje: 'Error' });
 
@@ -104,15 +184,24 @@ router.post('/', (req, res) => {
         }
 
         else if (tipo === 'chequera') {
-            db.query(`
-                INSERT INTO membresias 
-                (persona_id, tipo, fecha_inicio, dias_restantes, estado)
-                VALUES (?, 'chequera', ?, ?, 'activa')
-            `, [persona_id, fecha_inicio, dias], (err) => {
-
-                if (err) return res.status(500).json({ mensaje: 'Error' });
-
-                res.json({ mensaje: `Chequera creada con ${dias} días` });
+            db.query(` INSERT INTO membresias (
+                 persona_id,
+                 tipo,
+                  fecha_inicio,
+                   fecha_fin,
+                   dias_restantes,
+                   estado,
+                   comprobante) VALUES (?,'chequera',?, DATE_ADD(?, INTERVAL 30 DAY),?,'activa',?)
+               `, [persona_id, fecha_inicio, fecha_inicio, dias, comprobante], (err) => {
+                if (err) {
+                    console.error(err);
+                    return res.status(500).json({
+                        mensaje: 'Error'
+                    });
+                }
+                res.json({
+                    mensaje: `Chequera creada con ${dias} días`
+                });
             });
         }
     });

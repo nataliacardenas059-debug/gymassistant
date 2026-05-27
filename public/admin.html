@@ -116,31 +116,103 @@
             <!-- MEMBRESIAS -->
             <section id="membresias" class="modulo">
 
-                <h1>Membresías</h1>
+                <div class="header-modulo">
 
-                <div class="form-grid">
+                    <h1>Membresías</h1>
 
-                    <input type="text" id="docMembresia" placeholder="Documento usuario">
+                    <div class="acciones-usuarios">
 
-                    <select id="tipoMembresia">
-                        <option value="mensual">Mensual</option>
-                        <option value="chequera">Chequera</option>
-                    </select>
+                        <button onclick="mostrarSubModuloMembresia('registrar')">
+                            Registrar
+                        </button>
 
-                    <input type="date" id="fechaInicio">
+                        <button onclick="mostrarSubModuloMembresia('consultar')">
+                            Consultar
+                        </button>
 
-                    <input type="number" id="diasChequera" placeholder="Días chequera">
+                    </div>
 
-                    <button onclick="crearMembresia()">
-                        Registrar Membresía
-                    </button>
+                </div>
+
+                <!-- REGISTRAR -->
+                <div id="subRegistrarMembresia" class="submodulo-membresia activo-sub">
+
+                    <div class="form-grid">
+
+                        <input type="text" id="docMembresia" placeholder="Documento usuario">
+
+                        <select id="tipoMembresia">
+
+                            <option value="mensual">
+                                Mensual
+                            </option>
+
+                            <option value="chequera">
+                                Chequera
+                            </option>
+
+                        </select>
+
+                        <input type="date" id="fechaInicio">
+
+                        <input type="number" id="diasChequera" placeholder="Días chequera">
+                        <input type="file" id="comprobanteArchivo" accept=".pdf,image/*">
+
+                        <button onclick="crearMembresia()">
+                            Registrar Membresía
+                        </button>
+
+                    </div>
+
+                </div>
+
+                <!-- CONSULTAR -->
+                <div id="subConsultarMembresia" class="submodulo-membresia">
+
+                    <div class="header-modulo">
+
+                        <h2>Consultar Membresías</h2>
+
+                        <button onclick="cargarMembresias()">
+                            Actualizar
+                        </button>
+
+                    </div>
+
+                    <div class="tabla-container">
+
+                        <table>
+
+                            <thead>
+
+                                <tr>
+
+                                    <th>Usuario</th>
+                                    <th>Tipo</th>
+                                    <th>Estado</th>
+                                    <th>Inicio</th>
+                                    <th>Fin</th>
+                                    <th>Días</th>
+                                    <th>Comprobante</th>
+
+                                </tr>
+
+                            </thead>
+
+                            <tbody id="tablaMembresias">
+
+                            </tbody>
+
+                        </table>
+
+                    </div>
 
                 </div>
 
             </section>
 
             <!-- ACCESO -->
-            <section id="acceso" class="modulo">
+            <section id=" acceso" class="modulo">
 
                 <h1>Control de Acceso</h1>
 

@@ -261,39 +261,54 @@ async function guardarUsuario() {
 ========================= */
 
 async function crearMembresia() {
-
     try {
 
-        const documento = document.getElementById("docMembresia").value;
+        const documento =
+            document.getElementById("docMembresia").value;
 
-        const personaRes = await fetch(`/api/personas/${documento}`);
+        const personaRes =
+            await fetch(`/api/personas/${documento}`);
 
         const persona = await personaRes.json();
 
         if (!persona) {
+
             return alert("Usuario no encontrado");
         }
 
-        const body = {
+        const formData = new FormData();
 
-            persona_id: persona.id,
+        formData.append("persona_id", persona.id);
 
-            tipo: document.getElementById("tipoMembresia").value,
+        formData.append(
+            "tipo",
+            document.getElementById("tipoMembresia").value
+        );
 
-            fecha_inicio: document.getElementById("fechaInicio").value,
+        formData.append(
+            "fecha_inicio",
+            document.getElementById("fechaInicio").value
+        );
 
-            dias: document.getElementById("diasChequera").value
-        };
+        formData.append(
+            "dias",
+            document.getElementById("diasChequera").value
+        );
+
+        const archivo =
+            document.getElementById("comprobanteArchivo")
+                .files[0];
+
+        if (archivo) {
+
+            formData.append("comprobante", archivo);
+        }
 
         const res = await fetch("/api/membresias", {
 
             method: "POST",
 
-            headers: {
-                "Content-Type": "application/json"
-            },
-
-            body: JSON.stringify(body)
+            body: formData
         });
 
         const data = await res.json();
@@ -305,7 +320,6 @@ async function crearMembresia() {
         console.error(error);
     }
 }
-
 /* =========================
    CONSULTAR ACCESO
 ========================= */
@@ -438,6 +452,138 @@ async function cargarAforo() {
 
         console.error(error);
     }
+}
+
+/* =========================
+   SUBMODULOS MEMBRESIAS
+========================= */
+
+function mostrarSubModuloMembresia(tipo) {
+
+    document
+        .getElementById("subRegistrarMembresia")
+        .classList.remove("activo-sub");
+
+    document
+        .getElementById("subConsultarMembresia")
+        .classList.remove("activo-sub");
+
+    if (tipo === "registrar") {
+
+        document
+            .getElementById("subRegistrarMembresia")
+            .classList.add("activo-sub");
+
+    } else {
+
+        document
+            .getElementById("subConsultarMembresia")
+            .classList.add("activo-sub");
+
+        cargarMembresias();
+    }
+}
+
+/* =========================
+   CARGAR MEMBRESIAS
+========================= */
+
+async function cargarMembresias() {
+
+    try {
+
+        const res = await fetch("/api/membresias");
+
+        const data = await res.json();
+
+        renderMembresias(data);
+
+    } catch (error) {
+
+        console.error(error);
+    }
+}
+
+/* =========================
+   RENDER MEMBRESIAS
+========================= */
+
+function renderMembresias(lista) {
+
+    const tabla = document.getElementById("tablaMembresias");
+
+    tabla.innerHTML = "";
+
+    lista.forEach(m => {
+
+        let estadoClase = "estado-vencida";
+
+        if (
+            m.estado === "activa" ||
+            m.estado === "Beneficio activo"
+        ) {
+
+            estadoClase = "estado-activa";
+        }
+
+        tabla.innerHTML += `
+        
+        <tr>
+
+            <td>${m.nombre_completo || "Sin usuario"}</td>
+
+            <td>${m.tipo}</td>
+
+            <td class="${estadoClase}">
+                ${m.estado}
+            </td>
+
+            <td>
+                ${formatearFecha(m.fecha_inicio)}
+            </td>
+
+            <td>
+                ${formatearFecha(m.fecha_fin)}
+            </td>
+
+            <td>
+                ${m.dias_restantes || 0}
+            </td>
+
+            <td>
+
+                ${m.comprobante
+                ?
+                `
+                    <a
+                        href="/uploads/${m.comprobante}"
+                        target="_blank"
+                        class="comprobante-btn"
+                    >
+                        Ver archivo
+                    </a>
+                    `
+                :
+                "Sin archivo"
+            }
+
+            </td>
+
+        </tr>
+        `;
+    });
+}
+
+/* =========================
+   FORMATEAR FECHA
+========================= */
+
+function formatearFecha(fecha) {
+
+    if (!fecha) return "N/A";
+
+    return new Date(fecha)
+        .toLocaleDateString("es-CO");
 }
 
 /* =========================

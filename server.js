@@ -9,6 +9,7 @@ const accesoRoutes = require('./routes/acceso');
 
 
 app.use(express.json());
+app.use('/uploads', express.static('uploads'));
 
 // rutas API
 app.use('/api/personas', personasRoutes);
