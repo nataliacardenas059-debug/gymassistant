@@ -45,7 +45,6 @@ router.post('/', (req, res) => {
         tipo_documento,
         tipo_persona,
         tipo_profesor,
-        horas_semana
     } = req.body;
 
     // GENERAR CORREO
@@ -71,11 +70,18 @@ router.post('/', (req, res) => {
         // SI ES PROFESOR
         if (tipo_persona === "profesor") {
 
-            db.query(`
-                INSERT INTO profesores 
-                (persona_id, tipo_profesor, horas_semana, cumple_horas)
-                VALUES (?, ?, ?, false)
-            `, [personaId, tipo_profesor, horas_semana || 0], (err) => {
+            const minutosAsignados =
+
+                tipo_profesor === "vinculado"
+
+                    ? 120
+
+                    : 0;
+
+            db.query(` INSERT INTO profesores (
+                persona_id, tipo_profesor, horas_semana, cumple_horas)
+                VALUES (?,?,?,false)
+                `, [personaId, tipo_profesor, minutosAsignados], (err) => {
 
                 if (err) {
                     console.error(err);

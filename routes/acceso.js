@@ -10,9 +10,12 @@ function horarioAdministrativo() {
     const ahora = new Date();
 
     const hora = ahora.getHours();
-    const minutos = ahora.getMinutes();
 
-    const totalMin = (hora * 60) + minutos;
+    const minutos =
+        ahora.getMinutes();
+
+    const totalMin =
+        (hora * 60) + minutos;
 
     // 12:00 - 13:00
     const bloque1 =
@@ -52,6 +55,36 @@ async function validarIngreso(documento) {
             }
 
             const user = personas[0];
+            /* =========================
+              BLOQUE HORARIO ADMIN
+            ========================= */
+
+            const ahora = new Date();
+
+            const hora = ahora.getHours();
+
+            const horarioAdministrativo =
+                (hora >= 12 && hora < 13) ||
+                (hora >= 17 && hora < 18);
+
+            // SI NO ES ADMIN → BLOQUEAR
+            if (
+
+                horarioAdministrativo &&
+
+                user.tipo_persona !== 'administrativo'
+
+            ) {
+
+                return resolve({
+
+                    permitido: false,
+
+                    mensaje:
+                        '⛔ Horario exclusivo administrativos (12-1 y 5-6)'
+
+                });
+            }
 
             // VALIDAR AFORO
             db.query(`
@@ -91,9 +124,6 @@ async function validarIngreso(documento) {
 
                     // ADMINISTRATIVO
                     if (user.tipo_persona === 'administrativo') {
-
-                        const ahora = new Date();
-                        const hora = ahora.getHours();
 
                         const permitidoHorario =
                             (hora >= 12 && hora < 13) ||
@@ -341,6 +371,7 @@ router.post('/salida/:documento', (req, res) => {
         }
 
         const user = personas[0];
+
 
         db.query(`
             SELECT *

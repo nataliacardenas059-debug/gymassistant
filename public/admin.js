@@ -179,7 +179,6 @@ function abrirModalUsuario(modo = "crear") {
     if (modo === "crear") {
 
         limpiarFormulario();
-
         cambiarCamposPersona();
     }
 }
@@ -194,17 +193,19 @@ function cerrarModalUsuario() {
 
 function cambiarCamposPersona() {
 
-    const tipo = document.getElementById("tipoPersona").value;
+    const tipo =
+        document.getElementById("tipoPersona").value;
 
-    const divProfesor = document.getElementById("camposProfesor");
+    const grupoProfesor =
+        document.getElementById("grupoProfesor");
 
     if (tipo === "profesor") {
 
-        divProfesor.style.display = "grid";
+        grupoProfesor.style.display = "block";
 
     } else {
 
-        divProfesor.style.display = "none";
+        grupoProfesor.style.display = "none";
     }
 }
 
@@ -247,10 +248,7 @@ async function guardarUsuario() {
                 document.getElementById("tipoPersona").value,
 
             tipo_profesor:
-                document.getElementById("tipoProfesor").value,
-
-            horas_semana:
-                document.getElementById("horasSemana").value
+                document.getElementById("tipoProfesor").value
         };
 
         let url = "/api/personas";
@@ -675,3 +673,5 @@ cargarUsuarios();
 cargarAforo();
 
 cambiarCamposMembresia();
+
+cambiarCamposPersona();
