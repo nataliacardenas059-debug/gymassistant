@@ -472,11 +472,23 @@ async function cargarAforo() {
 
         const data = await res.json();
 
+        // TOTAL PERSONAS DENTRO
         document.getElementById("aforoActual").textContent =
-            data.dentro;
+            data.total;
 
+        // ESPACIOS DISPONIBLES
         document.getElementById("espaciosDisponibles").textContent =
-            30 - data.dentro;
+            30 - data.total;
+
+        // ACTUALIZAR TAMBIEN EL MODULO DE ACCESO
+        const aforoAcceso =
+            document.getElementById("aforoAcceso");
+
+        if (aforoAcceso) {
+
+            aforoAcceso.innerText =
+                `${data.total} / 30`;
+        }
 
     } catch (error) {
 
@@ -663,6 +675,230 @@ function cambiarCamposMembresia() {
         grupo.style.display = "none";
     }
 }
+/* =========================
+   MODULO ACCESO
+========================= */
+
+// REGISTRAR INGRESO
+async function registrarIngreso() {
+
+    const documento =
+        document.getElementById("documentoAcceso").value;
+
+    if (!documento) {
+
+        alert("Ingrese documento");
+
+        return;
+    }
+
+    try {
+
+        const response = await fetch(
+
+            `/api/acceso/ingresar/${documento}`,
+
+            {
+                method: "POST"
+            }
+        );
+
+        const data = await response.json();
+
+        mostrarResultado(data);
+
+        actualizarAforo();
+
+    } catch (error) {
+
+        console.error(error);
+
+        alert("Error servidor");
+    }
+}
+
+
+// REGISTRAR SALIDA
+async function registrarSalida() {
+
+    const documento =
+        document.getElementById("documentoAcceso").value;
+
+    if (!documento) {
+
+        alert("Ingrese documento");
+
+        return;
+    }
+
+    try {
+
+        const response = await fetch(
+
+            `/api/acceso/salida/${documento}`,
+
+            {
+                method: "POST"
+            }
+        );
+
+        const data = await response.json();
+
+        mostrarResultado(data);
+
+        actualizarAforo();
+
+    } catch (error) {
+
+        console.error(error);
+
+        alert("Error servidor");
+    }
+}
+
+
+// MOSTRAR RESULTADO
+function mostrarResultado(data) {
+
+    const box =
+        document.getElementById("resultadoAcceso");
+
+    box.classList.remove(
+        "resultado-ok",
+        "resultado-error"
+    );
+
+    // COLORES
+    if (data.permitido) {
+
+        box.classList.add("resultado-ok");
+
+    } else {
+
+        box.classList.add("resultado-error");
+    }
+
+    // HTML
+    box.innerHTML = `
+
+        <div class="resultado-info">
+
+            <h2>
+                ${data.mensaje}
+            </h2>
+
+            ${data.user
+            ? `
+
+                    <p>
+                        <strong>Nombre:</strong>
+                        ${data.user.nombre}
+                    </p>
+
+                    <p>
+                        <strong>Documento:</strong>
+                        ${data.user.documento}
+                    </p>
+
+                    <p>
+                        <strong>Tipo:</strong>
+                        ${data.user.tipo}
+                    </p>
+
+                `
+            : ''
+        }
+
+            ${data.acceso
+            ? `
+
+                    <hr>
+
+                    <p>
+                        <strong>Acceso:</strong>
+                        ${data.acceso.tipo}
+                    </p>
+
+                    <p>
+                        <strong>Membresía:</strong>
+                        ${data.acceso.membresia}
+                    </p>
+
+                    ${data.acceso.dias_restantes !== null
+                ? `
+                            <p>
+                                <strong>Días restantes:</strong>
+                                ${data.acceso.dias_restantes}
+                            </p>
+                        `
+                : ''
+            }
+
+                    ${data.acceso.minutos_usados !== null
+                ? `
+                            <p>
+                                <strong>Minutos usados:</strong>
+                                ${data.acceso.minutos_usados}
+                            </p>
+
+                            <p>
+                                <strong>Minutos disponibles:</strong>
+                                ${data.acceso.minutos_disponibles}
+                            </p>
+                        `
+                : ''
+            }
+
+                `
+            : ''
+        }
+
+        </div>
+    `;
+}
+
+document.getElementById(
+    "documentoAcceso"
+).value = "";
+
+/* =========================================
+   ACTUALIZAR AFORO
+========================================= */
+
+async function actualizarAforo() {
+
+    try {
+
+        const response =
+            await fetch('/api/acceso/aforo');
+
+        const data =
+            await response.json();
+
+        document.getElementById(
+            "aforoAcceso"
+        ).innerText = `${data.total} / 30`;
+
+    } catch (error) {
+
+        console.error(
+            "Error actualizando aforo:",
+            error
+        );
+    }
+}
+
+
+/* =========================================
+   CARGAR AFORO INICIAL
+========================================= */
+
+actualizarAforo();
+setInterval(() => {
+
+    cargarAforo();
+
+}, 3000);
 
 /* =========================
    INIT
@@ -675,3 +911,6 @@ cargarAforo();
 cambiarCamposMembresia();
 
 cambiarCamposPersona();
+
+// CARGAR AFORO AL ENTRAR
+actualizarAforo();

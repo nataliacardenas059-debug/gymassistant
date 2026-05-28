@@ -34,7 +34,7 @@
                     Membresías
                 </button>
 
-                <button class="menu-btn" onclick="mostrarModulo('acceso')">
+                <button class="menu-btn" onclick="mostrarModulo('modulo-acceso')">
                     Acceso
                 </button>
 
@@ -215,25 +215,57 @@
 
             </section>
 
-            <!-- ACCESO -->
-            <section id=" acceso" class="modulo">
+            <!-- MODULO ACCESO -->
+            <div id="modulo-acceso" class="modulo hidden">
 
-                <h1>Control de Acceso</h1>
+                <div class="card">
 
-                <div class="acceso-box">
+                    <h2>
+                        Control de Acceso
+                    </h2>
 
-                    <input type="text" id="docAcceso" placeholder="Documento usuario">
+                    <!-- AFORO -->
+                    <div class="aforo-box">
 
-                    <button onclick="consultarAcceso()">
-                        Consultar
-                    </button>
+                        <h3>
+                            Aforo Actual
+                        </h3>
+
+                        <p id="aforoAcceso">
+                            0 / 30
+                        </p>
+
+                    </div>
+
+                    <!-- FORMULARIO -->
+                    <div class="acceso-form">
+
+                        <input type="text" id="documentoAcceso" placeholder="Número de documento">
+
+                        <div class="acciones-acceso">
+
+                            <button onclick="registrarIngreso()">
+                                Registrar Ingreso
+                            </button>
+
+                            <button class="btn-salida" onclick="registrarSalida()">
+
+                                Registrar Salida
+
+                            </button>
+
+                        </div>
+
+                    </div>
+
+                    <!-- RESULTADO -->
+                    <div id="resultadoAcceso" class="resultado-acceso">
+
+                        Esperando consulta...
+
+                    </div>
 
                 </div>
-
-                <div id="resultadoAcceso"></div>
-
-            </section>
-
         </main>
 
     </div>
@@ -313,6 +345,7 @@
         </div>
 
     </div>
+
 
     <script src="admin.js"></script>
 

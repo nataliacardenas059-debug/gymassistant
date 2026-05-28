@@ -328,10 +328,52 @@ router.post('/ingresar/:documento', async (req, res) => {
                     WHERE id = ?
                 `, [data.membresia.id]);
             }
-
             res.json({
+
                 permitido: true,
-                mensaje: `✅ Ingreso registrado: ${user.nombre_completo}`
+
+                mensaje: `✅ Ingreso registrado`,
+
+                user: {
+
+                    id: user.id,
+
+                    nombre: user.nombre_completo,
+
+                    documento: user.numero_documento,
+
+                    tipo: user.tipo_persona
+
+                },
+
+                acceso: {
+
+                    tipo: data.tipo || "beneficio",
+
+                    membresia:
+
+                        data.membresia
+                            ? data.membresia.tipo
+                            : "Beneficio institucional",
+
+                    dias_restantes:
+
+                        data.membresia
+                            ? data.membresia.dias_restantes
+                            : null,
+
+                    minutos_usados:
+
+                        data.profesor
+                            ? data.profesor.minutos_acumulados
+                            : null,
+
+                    minutos_disponibles:
+
+                        data.profesor
+                            ? 120 - data.profesor.minutos_acumulados
+                            : null
+                }
             });
         });
 
@@ -366,6 +408,7 @@ router.post('/salida/:documento', (req, res) => {
 
         if (personas.length === 0) {
             return res.json({
+                permitido: false,
                 mensaje: 'Usuario no encontrado'
             });
         }
@@ -390,6 +433,7 @@ router.post('/salida/:documento', (req, res) => {
 
             if (ingresos.length === 0) {
                 return res.json({
+                    permitido: false,
                     mensaje: '⚠️ Usuario no tiene ingreso activo'
                 });
             }
@@ -422,19 +466,72 @@ router.post('/salida/:documento', (req, res) => {
                 // SUMAR MINUTOS PROFESORES
                 if (user.tipo_persona === 'profesor') {
 
-                    db.query(`
-                        UPDATE profesores
-                        SET minutos_acumulados =
-                            minutos_acumulados + ?
+                    db.query(` UPDATE profesores
+                        SET minutos_acumulados = 
+                        minutos_acumulados + ? 
                         WHERE persona_id = ?
                         AND tipo_profesor = 'vinculado'
-                    `, [minutos, user.id]);
+                     `,
+                        [minutos, user.id],
+
+                        (err) => {
+
+                            if (err) {
+
+                                console.error(
+                                    "Error actualizando minutos profesor:",
+                                    err
+                                );
+                            }
+                        });
                 }
 
                 res.json({
-                    mensaje: `✅ Salida registrada (${minutos} min)`
+                    permitido: true,
+                    mensaje: `✅ Salida registrada (${minutos} min)`,
+                    user: {
+
+                        nombre: user.nombre_completo,
+
+                        documento: user.numero_documento,
+
+                        tipo: user.tipo_persona
+
+                    }
+
                 });
             });
+        });
+    });
+});
+
+/* =========================================
+   AFORO ACTUAL
+========================================= */
+
+router.get('/aforo', (req, res) => {
+
+    db.query(`
+
+        SELECT COUNT(*) AS total
+        FROM registros_ingreso
+        WHERE estado = 'dentro'
+
+    `, (err, result) => {
+
+        if (err) {
+
+            return res.status(500).json({
+
+                mensaje: 'Error obteniendo aforo'
+
+            });
+        }
+
+        res.json({
+
+            total: result[0].total
+
         });
     });
 });
