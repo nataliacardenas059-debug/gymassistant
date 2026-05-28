@@ -114,14 +114,15 @@ router.get('/', (req, res) => {
 
             END AS estado
 
-        FROM membresias m
-
-        INNER JOIN personas p
-            ON p.id = m.persona_id
-
+         FROM membresias m
+         INNER JOIN (
+           SELECT
+        persona_id,
+        MAX(id) AS ultima_membresia FROM membresias
+        GROUP BY persona_id) ultimas ON m.id = ultimas.ultima_membresia 
+        INNER JOIN personas p ON p.id = m.persona_id
         ORDER BY m.id DESC
-    
-    `, (err, results) => {
+        `, (err, results) => {
 
         if (err) {
 
@@ -298,6 +299,29 @@ router.post('/ingreso/:documento', (req, res) => {
             if (membresias.length === 0) return res.json({ mensaje: 'No tiene membresía activa' });
 
             const membresia = membresias[0];
+            const hoy = new Date();
+
+            const fechaFin =
+                new Date(membresia.fecha_fin);
+
+            const diferencia =
+                fechaFin - hoy;
+
+            const diasRestantes =
+                Math.ceil(
+                    diferencia /
+                    (1000 * 60 * 60 * 24)
+                );
+
+            membresia.dias_restantes =
+                diasRestantes > 0
+                    ? diasRestantes
+                    : 0;
+
+            membresia.estado =
+                membresia.dias_restantes > 0
+                    ? "Activa"
+                    : "Vencida";
 
             db.query(`
                 SELECT * FROM registros_ingreso

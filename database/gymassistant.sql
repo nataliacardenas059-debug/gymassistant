@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 26-05-2026 a las 02:03:49
+-- Tiempo de generación: 28-05-2026 a las 04:40:57
 -- Versión del servidor: 10.4.32-MariaDB
 -- Versión de PHP: 8.2.12
 
@@ -99,19 +99,6 @@ CREATE TABLE `membresias` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Volcado de datos para la tabla `membresias`
---
-
-INSERT INTO `membresias` (`id`, `persona_id`, `fecha_inicio`, `fecha_fin`, `tipo`, `dias_restantes`, `estado`, `comprobante`, `tipo_beneficio`) VALUES
-(5, 2, '2026-05-09', '2026-06-09', 'mensual', NULL, 'activa', NULL, 'ninguno'),
-(6, 9, '2026-05-06', '2026-06-06', 'mensual', NULL, 'activa', NULL, 'ninguno'),
-(7, 11, '2026-05-10', '2026-06-03', 'mensual', NULL, 'activa', NULL, 'ninguno'),
-(8, 12, '2026-04-09', '2026-05-09', 'mensual', NULL, 'inactiva', NULL, 'ninguno'),
-(9, 12, '2026-05-11', '2026-06-10', 'mensual', NULL, 'activa', NULL, 'ninguno'),
-(10, 22, '2026-05-10', '2026-06-09', 'mensual', NULL, 'activa', NULL, 'ninguno'),
-(11, 16, '2026-05-04', '2026-06-03', 'mensual', NULL, 'activa', NULL, 'ninguno');
-
---
 -- Disparadores `membresias`
 --
 DELIMITER $$
@@ -155,26 +142,6 @@ CREATE TABLE `personas` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Volcado de datos para la tabla `personas`
---
-
-INSERT INTO `personas` (`id`, `nombre_completo`, `numero_documento`, `tipo_documento`, `tipo_persona`, `rol`, `estado`, `ultima_asistencia`, `correo`, `sesion_activa`, `ultima_actividad`, `tipo_acceso`) VALUES
-(2, 'Sara Sanchez', '1279027216', 'cc', 'estudiante', 'estudiante', 'activo', NULL, 'sara.sanchez216@pascualbravo.edu.co', 0, NULL, 'membresia'),
-(8, 'Juan Cardona', '1023823972', 'ti', 'estudiante', 'estudiante', 'activo', NULL, 'juan.cardona972@pascualbravo.edu.co', 0, NULL, 'membresia'),
-(9, 'Yasmin Liliana Isaza', '4353063721', 'CE', 'profesor', 'estudiante', 'activo', NULL, 'yasmin.liliana721@pascualbravo.edu.co', 0, NULL, 'membresia'),
-(10, 'Daniel Gonzalez Acevedo', '1022273640', 'PAS', 'estudiante', 'estudiante', 'activo', NULL, 'daniel.gonzalez640@pascualbravo.edu.co', 0, NULL, 'membresia'),
-(11, 'Martin Cardona Velez', '25237392', 'CC', 'administrativo', 'estudiante', 'activo', NULL, 'martin.cardona392@pascualbravo.edu.co', 0, NULL, 'membresia'),
-(12, 'Sofia Guzman Jaramillo', '273182029', 'CE', 'administrativo', 'estudiante', 'activo', NULL, 'sofia.guzman029@pascualbravo.edu.co', 0, NULL, 'membresia'),
-(15, 'Luisa Fernanda Cárdenas Parra', '2716780', 'CC', 'profesor', 'estudiante', 'activo', NULL, 'luisa.fernanda780@pascualbravo.edu.co', 0, NULL, 'membresia'),
-(16, 'Natalia Cárdenas Vásquez', '1034991059', 'CC', 'estudiante', 'estudiante', 'activo', NULL, 'natalia.cardenas059@pascualbravo.edu.co', 0, NULL, 'membresia'),
-(17, 'Luisa Fernanda Cárdenas Parra', '215921289', 'CC', 'profesor', 'estudiante', 'activo', NULL, 'luisa.fernanda289@pascualbravo.edu.co', 0, NULL, 'membresia'),
-(18, 'Fernando Gaviria Salazar ', '48273843', 'CC', 'profesor', 'estudiante', 'activo', NULL, 'fernando.gaviria843@pascualbravo.edu.co', 0, NULL, 'membresia'),
-(19, 'Carlos Rivera Sánchez ', '2627289', 'CE', 'administrativo', 'estudiante', 'activo', NULL, 'carlos.rivera289@pascualbravo.edu.co', 0, NULL, 'membresia'),
-(20, 'Mónica Agudelo Cárdenas ', '26191039', 'TI', 'estudiante', 'estudiante', 'activo', NULL, 'monica.agudelo039@pascualbravo.edu.co', 0, NULL, 'membresia'),
-(21, 'Natalia Acevedo Gonzales', '261281209', 'PAS', 'estudiante', 'estudiante', 'activo', NULL, 'natalia.acevedo209@pascualbravo.edu.co', 0, NULL, 'membresia'),
-(22, 'Maria Fernanda Usuga Suarez', '1726187109', 'CC', 'estudiante', 'estudiante', 'activo', NULL, 'maria.fernanda109@pascualbravo.edu.co', 0, NULL, 'membresia');
-
---
 -- Disparadores `personas`
 --
 DELIMITER $$
@@ -205,7 +172,7 @@ DELIMITER ;
 CREATE TABLE `profesores` (
   `id` int(11) NOT NULL,
   `persona_id` int(11) NOT NULL,
-  `tipo_profesor` varchar(20) DEFAULT NULL,
+  `tipo_profesor` enum('vinculado','externo') DEFAULT NULL,
   `horas_semana` int(11) DEFAULT 0,
   `cumple_horas` tinyint(1) DEFAULT 0,
   `minutos_acumulados` int(11) DEFAULT 0,
@@ -214,31 +181,20 @@ CREATE TABLE `profesores` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Volcado de datos para la tabla `profesores`
---
-
-INSERT INTO `profesores` (`id`, `persona_id`, `tipo_profesor`, `horas_semana`, `cumple_horas`, `minutos_acumulados`, `semana_control`, `beneficio_activo`) VALUES
-(1, 17, 'no_vinculado', 0, 0, 0, 21, 1),
-(2, 18, 'vinculado', 2, 0, 0, 21, 1);
-
---
 -- Disparadores `profesores`
 --
 DELIMITER $$
-CREATE TRIGGER `validar_tipo_profesor_insert` BEFORE INSERT ON `profesores` FOR EACH ROW BEGIN 
-    IF NEW.tipo_profesor NOT IN ('vinculado','no_vinculado') THEN 
-        SIGNAL SQLSTATE '45000' 
-        SET MESSAGE_TEXT = 'Tipo de profesor inválido: debe ser vinculado o no_vinculado'; 
-    END IF; 
-END
-$$
-DELIMITER ;
-DELIMITER $$
 CREATE TRIGGER `validar_tipo_profesor_update` BEFORE UPDATE ON `profesores` FOR EACH ROW BEGIN
-    IF NEW.tipo_profesor NOT IN ('interno', 'externo') THEN
+
+    IF NEW.tipo_profesor NOT IN ('vinculado', 'externo') THEN
+
         SIGNAL SQLSTATE '45000'
-        SET MESSAGE_TEXT = 'Tipo de profesor inválido';
+
+        SET MESSAGE_TEXT =
+        'Tipo de profesor inválido: debe ser vinculado o externo';
+
     END IF;
+
 END
 $$
 DELIMITER ;
@@ -258,16 +214,6 @@ CREATE TABLE `registros_ingreso` (
   `tiempo_total` int(11) DEFAULT 0,
   `estado` enum('dentro','finalizado') DEFAULT 'dentro'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
---
--- Volcado de datos para la tabla `registros_ingreso`
---
-
-INSERT INTO `registros_ingreso` (`id`, `persona_id`, `fecha_hora`, `metodo_ingreso`, `hora_salida`, `tiempo_total`, `estado`) VALUES
-(1, 11, '2026-05-10 13:30:53', 'recepcion', NULL, 0, 'dentro'),
-(2, 9, '2026-05-11 16:45:04', 'recepcion', NULL, 0, 'dentro'),
-(3, 2, '2026-05-11 17:02:01', 'recepcion', NULL, 0, 'dentro'),
-(4, 16, '2026-05-12 10:16:02', 'recepcion', NULL, 0, 'dentro');
 
 --
 -- Disparadores `registros_ingreso`
@@ -396,25 +342,25 @@ ALTER TABLE `horarios_administrativos`
 -- AUTO_INCREMENT de la tabla `membresias`
 --
 ALTER TABLE `membresias`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=15;
 
 --
 -- AUTO_INCREMENT de la tabla `personas`
 --
 ALTER TABLE `personas`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=24;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=33;
 
 --
 -- AUTO_INCREMENT de la tabla `profesores`
 --
 ALTER TABLE `profesores`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 
 --
 -- AUTO_INCREMENT de la tabla `registros_ingreso`
 --
 ALTER TABLE `registros_ingreso`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=18;
 
 --
 -- Restricciones para tablas volcadas

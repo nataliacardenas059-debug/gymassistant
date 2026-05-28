@@ -176,10 +176,15 @@ async function validarIngreso(documento) {
                                     }
 
                                     if (profesor.minutos_acumulados >= 120) {
-                                        return resolve({
-                                            permitido: false,
-                                            mensaje: '🚫 Profesor ya agotó sus 2 horas semanales'
-                                        });
+
+                                        // SI AGOTÓ BENEFICIO
+                                        // VALIDAR SI TIENE MEMBRESÍA NORMAL
+
+                                        return validarMembresia(
+                                            user,
+                                            resolve,
+                                            reject
+                                        );
                                     }
 
                                     return resolve({
@@ -466,24 +471,33 @@ router.post('/salida/:documento', (req, res) => {
                 // SUMAR MINUTOS PROFESORES
                 if (user.tipo_persona === 'profesor') {
 
-                    db.query(` UPDATE profesores
-                        SET minutos_acumulados = 
-                        minutos_acumulados + ? 
-                        WHERE persona_id = ?
-                        AND tipo_profesor = 'vinculado'
-                     `,
-                        [minutos, user.id],
+                    db.query(`SELECT * FROM profesores WHERE persona_id = ? AND tipo_profesor = 'vinculado'
+                     `, [user.id], (err, profesores) => {
 
-                        (err) => {
+                        if (
+                            err ||
+                            profesores.length === 0
+                        ) {
 
-                            if (err) {
+                            return;
+                        }
 
-                                console.error(
-                                    "Error actualizando minutos profesor:",
-                                    err
-                                );
-                            }
-                        });
+                        db.query(` UPDATE profesores
+                            SET minutos_acumulados = minutos_acumulados + ?
+                            WHERE persona_id = ?
+                            `,
+                            [minutos, user.id],
+                            (err) => {
+
+                                if (err) {
+
+                                    console.error(
+                                        "Error actualizando minutos:",
+                                        err
+                                    );
+                                }
+                            });
+                    });
                 }
 
                 res.json({
@@ -534,6 +548,112 @@ router.get('/aforo', (req, res) => {
 
         });
     });
+});
+
+//HISTORIAL USUARIOS
+router.get('/historial/:id', (req, res) => {
+    const id = req.params.id;
+    db.query(
+        `
+        SELECT
+            fecha_hora,
+            fecha_salida,
+            estado
+        FROM registros_ingreso
+        WHERE persona_id = ?
+        ORDER BY fecha_hora DESC
+        `,
+        [id],
+        (err, result) => {
+            if (err) {
+                console.error(err);
+                return res.status(500).json({
+                    mensaje:
+                        'Error obteniendo historial'
+                });
+            }
+            res.json(result);
+        }
+    );
+});
+
+router.put('/salida/:id', (req, res) => {
+    const id = req.params.id;
+    db.query(
+        `
+        SELECT tipo_persona
+        FROM personas
+        WHERE id = ?
+        `,
+        [id],
+        (err, result) => {
+
+            if (err || !result.length) {
+
+                return res.status(500).json({
+
+                    mensaje:
+                        'Usuario no encontrado'
+                });
+            }
+            const tipo =
+                result[0].tipo_persona;
+
+            // ❌ ADMINISTRATIVOS NO
+
+            if (tipo === 'administrativo') {
+
+                return res.json({
+
+                    mensaje:
+                        'Los administrativos no registran salida'
+                });
+            }
+            // ✅ ACTUALIZAR ÚLTIMO INGRESO
+
+            db.query(
+                `
+                UPDATE registros_ingreso
+                SET
+
+                    estado = 'fuera',
+
+                    fecha_salida = NOW()
+
+                WHERE
+
+                    persona_id = ?
+
+                    AND estado = 'dentro'
+
+                ORDER BY id DESC
+                LIMIT 1
+                `,
+                [id],
+
+                (err2) => {
+
+                    if (err2) {
+
+                        console.error(err2);
+
+                        return res.status(500).json({
+
+                            mensaje:
+                                'Error registrando salida'
+                        });
+                    }
+                    res.json({
+
+                        success: true,
+
+                        mensaje:
+                            'Salida registrada correctamente'
+                    });
+                }
+            );
+        }
+    );
 });
 
 module.exports = router;

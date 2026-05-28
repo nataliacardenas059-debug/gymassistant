@@ -3,40 +3,151 @@ const router = express.Router();
 const db = require('../db');
 
 const ADMIN_CORREO = "admin@gymassistant.com";
+const ADMIN_PASSWORD = "123456";
 
 router.post('/login', (req, res) => {
-    const { correo } = req.body;
+
+    const { correo, password } = req.body;
 
     if (!correo) {
-        return res.status(400).json({ mensaje: 'Correo requerido' });
+
+        return res.status(400).json({
+            mensaje: 'Correo requerido'
+        });
     }
 
-    // 🔴 CASO ADMIN (ACCESO AL PANEL)
-    if (correo === ADMIN_CORREO) {
+    // 🔴 ADMIN
+    if (
+        correo === ADMIN_CORREO
+        &&
+        password === ADMIN_PASSWORD
+    ) {
+
         return res.json({
+
             id: 0,
+
             rol: "admin"
         });
     }
 
-    // 🔵 CASO USUARIOS NORMALES
-    db.query('SELECT * FROM personas WHERE correo = ?', [correo], (err, result) => {
+    // 🔵 USUARIOS
+    db.query(
 
-        if (err) {
-            return res.status(500).json({ mensaje: 'Error servidor' });
+        'SELECT * FROM personas WHERE correo = ?',
+
+        [correo],
+
+        (err, result) => {
+
+            if (err) {
+
+                return res.status(500).json({
+
+                    mensaje:
+                        'Error servidor'
+                });
+            }
+
+            if (result.length === 0) {
+
+                return res.json({
+
+                    mensaje:
+                        'Usuario no encontrado'
+                });
+            }
+
+            const user = result[0];
+
+            // 🟡 PRIMER INGRESO
+            // NO TIENE CONTRASEÑA
+
+            if (!user.password) {
+
+                return res.json({
+
+                    primerIngreso: true,
+
+                    id: user.id,
+
+                    rol: "usuario"
+                });
+            }
+
+            // 🔴 VALIDAR PASSWORD
+
+            if (user.password !== password) {
+
+                return res.json({
+
+                    mensaje:
+                        'Contraseña incorrecta'
+                });
+            }
+
+            // ✅ LOGIN NORMAL
+
+            res.json({
+
+                id: user.id,
+
+                rol: "usuario"
+            });
         }
+    );
+});
 
-        if (result.length === 0) {
-            return res.json({ mensaje: 'Usuario no encontrado' });
-        }
+// CREAR CONTRASEÑA
+router.post('/crear-password', (req, res) => {
 
-        const user = result[0];
+    const {
 
-        res.json({
-            id: user.id,
-            rol: "usuario"
+        id,
+        password
+
+    } = req.body;
+
+    if (!password) {
+
+        return res.json({
+
+            mensaje:
+                'Contraseña requerida'
         });
-    });
+    }
+
+    db.query(
+
+        `
+
+        UPDATE personas
+
+        SET password = ?
+
+        WHERE id = ?
+
+        `,
+
+        [password, id],
+
+        (err) => {
+
+            if (err) {
+
+                return res.status(500).json({
+
+                    mensaje:
+                        'Error guardando contraseña'
+                });
+            }
+
+            res.json({
+
+                success: true
+            });
+        }
+    );
 });
 
 module.exports = router;

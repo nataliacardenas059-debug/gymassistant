@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <title>GymAssistant</title>
-    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="stylesLogin.css">
 </head>
 
 <body class="login-body">
@@ -16,6 +16,7 @@
             <p>Acceso al sistema</p>
 
             <input type="text" id="correo" placeholder="Correo institucional">
+            <input type="password" id="password" placeholder="Contraseña">
 
             <button onclick="login()" class="btn-primary">Ingresar</button>
 
@@ -25,32 +26,137 @@
     </div>
 
     <script>
-        function login() {
-            const correo = document.getElementById("correo").value;
 
-            fetch('/api/auth/login', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ correo })
-            })
-                .then(res => res.json())
-                .then(user => {
+        async function login() {
 
-                    if (user.mensaje) {
-                        document.getElementById("error").innerText = user.mensaje;
-                        return;
-                    }
+            const correo =
+                document.getElementById(
+                    "correo"
+                ).value;
 
-                    localStorage.setItem("rol", user.rol);
-                    localStorage.setItem("id", user.id);
+            const password =
+                document.getElementById(
+                    "password"
+                ).value;
 
-                    if (user.rol === "admin") {
-                        window.location.href = "admin.html";
-                    } else {
-                        window.location.href = "usuario.html";
-                    }
+            const res =
+                await fetch('/api/auth/login', {
+
+                    method: 'POST',
+
+                    headers: {
+
+                        'Content-Type':
+                            'application/json'
+                    },
+
+                    body: JSON.stringify({
+
+                        correo,
+                        password
+                    })
                 });
+
+            const user =
+                await res.json();
+
+            // ❌ ERROR
+
+            if (user.mensaje) {
+
+                document
+                    .getElementById("error")
+                    .innerText =
+                    user.mensaje;
+
+                return;
+            }
+
+            // 🟡 PRIMER INGRESO
+
+            if (user.primerIngreso) {
+
+                const nuevaPassword =
+                    prompt(
+
+                        "Es tu primer ingreso.\n\nCrea una contraseña:"
+                    );
+
+                if (!nuevaPassword) {
+
+                    return;
+                }
+
+                const crear =
+                    await fetch(
+                        '/api/auth/crear-password',
+
+                        {
+
+                            method: 'POST',
+
+                            headers: {
+
+                                'Content-Type':
+                                    'application/json'
+                            },
+
+                            body: JSON.stringify({
+
+                                id: user.id,
+
+                                password:
+                                    nuevaPassword
+                            })
+                        }
+                    );
+
+                const resultado =
+                    await crear.json();
+
+                if (resultado.success) {
+
+                    alert(
+                        "Contraseña creada correctamente"
+                    );
+
+                    location.reload();
+                }
+
+                return;
+            }
+
+            // ✅ LOGIN EXITOSO
+
+            localStorage.setItem(
+                "rol",
+                user.rol
+            );
+
+            localStorage.setItem(
+                "id",
+                user.id
+            );
+
+            // SESIÓN
+
+            localStorage.setItem(
+                "sesionActiva",
+                true
+            );
+
+            if (user.rol === "admin") {
+
+                window.location.href =
+                    "admin.html";
+
+            } else {
+
+                window.location.href =
+                    "usuario.html";
+            }
         }
+
     </script>
 
 </body>
