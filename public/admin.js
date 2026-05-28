@@ -549,35 +549,52 @@ async function cargarMembresias() {
 /* =========================
    RENDER MEMBRESIAS
 ========================= */
-
 function renderMembresias(lista) {
 
-    const tabla = document.getElementById("tablaMembresias");
+    const tabla =
+        document.getElementById(
+            "bodyMembresias"
+        );
 
     tabla.innerHTML = "";
 
     lista.forEach(m => {
 
+        let estadoTexto = m.estado;
+
         let estadoClase = "estado-vencida";
 
-        if (
-            m.estado === "activa" ||
-            m.estado === "Beneficio activo"
-        ) {
+        // BENEFICIO
+        if (m.tipo === "beneficio") {
 
-            estadoClase = "estado-activa";
+            estadoTexto =
+                "Beneficio activo";
+
+            estadoClase =
+                "estado-activa";
+        }
+
+        // ACTIVA NORMAL
+        else if (m.estado === "activa") {
+
+            estadoClase =
+                "estado-activa";
         }
 
         tabla.innerHTML += `
         
         <tr>
 
-            <td>${m.nombre_completo || "Sin usuario"}</td>
+            <td>
+                ${m.nombre_completo || "Sin usuario"}
+            </td>
 
-            <td>${m.tipo}</td>
+            <td>
+                ${m.tipo}
+            </td>
 
             <td class="${estadoClase}">
-                ${m.estado}
+                ${estadoTexto}
             </td>
 
             <td>
@@ -585,7 +602,9 @@ function renderMembresias(lista) {
             </td>
 
             <td>
-                ${formatearFecha(m.fecha_fin)}
+                ${m.tipo === "chequera" ? "Sin vencimiento" :
+                formatearFecha(m.fecha_fin)
+            }
             </td>
 
             <td>
@@ -593,26 +612,32 @@ function renderMembresias(lista) {
                 ?
                 calcularDiasRestantes(
                     m.fecha_fin
-                ) + " días"
-                :
-                (m.dias_restantes || 0) + " días"
+                ) + " días restantes"
+                : m.tipo === "chequera"
+                    ?
+                    `${m.dias_restantes || 0} accesos disponibles`
+                    :
+                    "Ilimitado"
             }
            </td>
-
             <td>
 
                 ${m.comprobante
+
                 ?
+
                 `
-                    <a
-                        href="/uploads/${m.comprobante}"
-                        target="_blank"
-                        class="comprobante-btn"
-                    >
-                        Ver archivo
-                    </a>
-                    `
+                <a
+                    href="/uploads/${m.comprobante}"
+                    target="_blank"
+                    class="comprobante-btn"
+                >
+                    Ver archivo
+                </a>
+                `
+
                 :
+
                 "Sin archivo"
             }
 
@@ -622,6 +647,7 @@ function renderMembresias(lista) {
         `;
     });
 }
+
 
 /* =========================
    FORMATEAR FECHA
@@ -886,6 +912,42 @@ async function actualizarAforo() {
             error
         );
     }
+}
+
+function filtrarMembresias() {
+
+    const filtro =
+
+        document.getElementById(
+            "buscarMembresia"
+        ).value.toLowerCase();
+
+    const filas =
+
+        document.querySelectorAll(
+            "#tablaMembresias tbody tr"
+        );
+
+    filas.forEach(fila => {
+
+        const texto =
+            fila.innerText.toLowerCase();
+
+        fila.style.display =
+
+            texto.includes(filtro)
+
+                ? ""
+
+                : "none";
+    });
+}
+
+function cerrarSesion() {
+
+    localStorage.removeItem("token");
+
+    window.location.href = "index.html";
 }
 
 

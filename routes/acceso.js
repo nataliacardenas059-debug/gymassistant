@@ -218,35 +218,67 @@ async function validarIngreso(documento) {
 function validarMembresia(user, resolve, reject) {
 
     db.query(`
+
         SELECT *
+
         FROM membresias
+
         WHERE persona_id = ?
-        AND estado = 'activa'
         AND (
-            (tipo = 'mensual'
-                AND CURDATE() BETWEEN fecha_inicio AND fecha_fin)
-            OR
-            (tipo = 'chequera'
-                AND dias_restantes > 0)
+
+            tipo = 'beneficio'
+
+            OR (
+
+                estado = 'activa'
+
+                AND tipo = 'mensual'
+
+                AND CURDATE()
+                BETWEEN fecha_inicio AND fecha_fin
+            )
+
+            OR (
+
+                estado = 'activa'
+
+                AND tipo = 'chequera'
+
+                AND dias_restantes > 0
+            )
         )
+
         ORDER BY id DESC
+
         LIMIT 1
+
     `, [user.id], (err, membresias) => {
 
-        if (err) return reject(err);
+        if (err) {
+
+            return reject(err);
+        }
 
         if (membresias.length === 0) {
+
             return resolve({
+
                 permitido: false,
+
                 mensaje: '❌ No tiene membresía activa'
             });
         }
 
         return resolve({
+
             permitido: true,
+
             tipo: 'membresia',
+
             user,
+
             membresia: membresias[0],
+
             mensaje: '✅ Membresía válida'
         });
     });

@@ -66,6 +66,27 @@ router.post('/', (req, res) => {
         }
 
         const personaId = result.insertId;
+        /* =====================================
+           MEMBRESÍA AUTOMÁTICA ADMINISTRATIVOS
+        ===================================== */
+        if (tipo_persona === "administrativo") {
+            db.query(`INSERT INTO membresias (
+                persona_id,
+                tipo,
+                fecha_inicio,
+                fecha_fin,
+                estado) VALUES ( ?,'beneficio',
+                CURDATE(),
+                DATE_ADD(CURDATE(), INTERVAL 100 YEAR),'activa' )
+             `, [personaId], (err) => {
+                if (err) {
+                    console.error(
+                        "Error creando beneficio administrativo:",
+                        err
+                    );
+                }
+            });
+        }
 
         // SI ES PROFESOR
         if (tipo_persona === "profesor") {
@@ -136,61 +157,86 @@ router.delete('/:id', (req, res) => {
 
     const id = req.params.id;
 
-    // 1. validar membresía activa
+    // VALIDAR MEMBRESÍAS
     db.query(`
-        SELECT * FROM membresias
+
+        SELECT *
+        FROM membresias
         WHERE persona_id = ?
-        AND (
-            (tipo = 'mensual' AND CURDATE() BETWEEN fecha_inicio AND fecha_fin)
-            OR
-            (tipo = 'chequera' AND dias_restantes > 0)
-        )
+
     `, [id], (err, membresias) => {
 
-        if (err) return res.status(500).json({ mensaje: 'Error servidor' });
+        if (err) {
 
-        if (membresias.length > 0) {
-            return res.json({
-                mensaje: '❌ No se puede eliminar: tiene membresía activa'
+            return res.status(500).json({
+
+                mensaje: 'Error validando membresías'
             });
         }
 
-        // 2. validar última asistencia (6 meses)
+        // SI TIENE MEMBRESÍAS O BENEFICIOS
+        if (membresias.length > 0) {
+
+            return res.json({
+
+                permitido: false,
+
+                mensaje:
+                    '❌ No se puede eliminar: el usuario tiene membresías o beneficios'
+            });
+        }
+
+        // VALIDAR INGRESOS
         db.query(`
-            SELECT 
-                MAX(fecha_hora) AS ultima
+
+            SELECT *
             FROM registros_ingreso
             WHERE persona_id = ?
-        `, [id], (err, result) => {
 
-            if (err) return res.status(500).json({ mensaje: 'Error servidor' });
+        `, [id], (err, ingresos) => {
 
-            const ultima = result[0].ultima;
+            if (err) {
 
-            if (ultima) {
-                const fechaUltima = new Date(ultima);
-                const hoy = new Date();
+                return res.status(500).json({
 
-                const diffMeses = (hoy - fechaUltima) / (1000 * 60 * 60 * 24 * 30);
-
-                if (diffMeses < 6) {
-                    return res.json({
-                        mensaje: '⚠️ No se puede eliminar: usuario activo recientemente'
-                    });
-                }
+                    mensaje: 'Error validando historial'
+                });
             }
 
-            // 3. eliminar registros primero (FK)
-            db.query(`DELETE FROM registros_ingreso WHERE persona_id = ?`, [id]);
+            // SI TIENE HISTORIAL
+            if (ingresos.length > 0) {
 
-            db.query(`DELETE FROM membresias WHERE persona_id = ?`, [id]);
+                return res.json({
 
-            // 4. eliminar persona
-            db.query(`DELETE FROM personas WHERE id = ?`, [id], (err) => {
+                    permitido: false,
 
-                if (err) return res.status(500).json({ mensaje: 'Error al eliminar' });
+                    mensaje:
+                        '❌ No se puede eliminar: el usuario tiene historial de ingresos'
+                });
+            }
 
-                res.json({ mensaje: '✅ Usuario eliminado correctamente' });
+            // ELIMINAR
+            db.query(`
+
+                DELETE FROM personas
+                WHERE id = ?
+
+            `, [id], (err) => {
+
+                if (err) {
+
+                    return res.status(500).json({
+
+                        mensaje: 'Error eliminando usuario'
+                    });
+                }
+
+                res.json({
+
+                    permitido: true,
+
+                    mensaje: '✅ Usuario eliminado correctamente'
+                });
             });
         });
     });

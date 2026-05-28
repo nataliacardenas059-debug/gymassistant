@@ -38,6 +38,10 @@
                     Acceso
                 </button>
 
+                <button class="btn-logout" onclick="cerrarSesion()">
+                    Cerrar sesión
+                </button>
+
             </nav>
 
         </aside>
@@ -184,31 +188,33 @@
                     </div>
 
                     <div class="tabla-container">
+                        <input type="text" id="buscarMembresia" placeholder="Buscar membresía..."
+                            onkeyup="filtrarMembresias()" />
 
-                        <table>
+                        <table id="tablaMembresias">
 
-                            <thead>
+                            <table id="tablaMembresias">
 
-                                <tr>
+                                <thead>
 
-                                    <th>Usuario</th>
-                                    <th>Tipo</th>
-                                    <th>Estado</th>
-                                    <th>Inicio</th>
-                                    <th>Fin</th>
-                                    <th>Días</th>
-                                    <th>Comprobante</th>
+                                    <tr>
 
-                                </tr>
+                                        <th>Nombre</th>
+                                        <th>Tipo</th>
+                                        <th>Estado</th>
+                                        <th>Inicio</th>
+                                        <th>Fin</th>
+                                        <th>Días</th>
+                                        <th>Comprobante</th>
 
-                            </thead>
+                                    </tr>
 
-                            <tbody id="tablaMembresias">
+                                </thead>
 
-                            </tbody>
+                                <tbody id="bodyMembresias">
 
-                        </table>
-
+                                </tbody>
+                            </table>
                     </div>
 
                 </div>

@@ -196,60 +196,65 @@
         }
 
         // CARGAR MEMBRESÍA
-
         function cargarMembresia() {
 
-            fetch(
-
-                '/api/membresias/' + id
-
-            )
+            fetch('/api/membresias/' + id)
 
                 .then(res => res.json())
 
                 .then(data => {
 
                     const contenedor =
-                        document.getElementById(
-                            "info"
-                        );
+                        document.getElementById("info");
 
                     if (data.mensaje) {
 
                         contenedor.innerHTML = `
-
-                    <div class="card-user">
-
-                        <p>${data.mensaje}</p>
-
-                    </div>
-
-                `;
+                <div class="card-user">
+                    <p>${data.mensaje}</p>
+                </div>
+            `;
 
                         return;
                     }
 
                     let color = "#f59e0b";
+                    let estadoTexto = data.estado;
+                    let extraInfo = "";
 
-                    if (
-                        data.estado === "Activa"
+                    // BENEFICIO
+                    if (data.tipo === "beneficio") {
+
+                        color = "#22c55e";
+                        estadoTexto = "Beneficio activo";
+
+                        extraInfo += `
+                <p style="color:#22c55e;">
+                    ♾️ Beneficio institucional ilimitado
+                </p>
+            `;
+                    }
+
+                    // ACTIVA
+                    else if (
+                        data.estado === "Activa" ||
+                        data.estado === "activa"
                     ) {
 
                         color = "#22c55e";
                     }
 
-                    if (
-                        data.estado === "Inactiva"
-                    ) {
+                    // INACTIVA
+                    else {
 
                         color = "#ef4444";
                     }
 
-                    let extraInfo = "";
-
                     // MENSUAL
-
-                    if (data.fecha_fin) {
+                    if (
+                        data.tipo === "mensual" &&
+                        data.fecha_fin
+                    ) {
 
                         const dias =
                             calcularDiasRestantes(
@@ -259,127 +264,86 @@
                         if (dias > 0) {
 
                             extraInfo += `
-
-                        <p>
-
-                            ⏳ Te quedan
-                            <strong>${dias}</strong>
-                            días
-
-                        </p>
-
-                    `;
+                    <p>
+                        ⏳ Te quedan
+                        <strong>${dias}</strong>
+                        días
+                    </p>
+                `;
 
                         } else {
 
                             extraInfo += `
-
-                        <p style="color:#ef4444;">
-
-                            Membresía vencida
-
-                        </p>
-
-                    `;
+                    <p style="color:#ef4444;">
+                        Membresía vencida
+                    </p>
+                `;
                         }
                     }
 
                     // CHEQUERA
-
                     if (
-
-                        data.dias_restantes !==
-                        undefined
-
-                        &&
-
-                        data.dias_restantes !==
-                        null
-
+                        data.tipo === "chequera" &&
+                        data.dias_restantes != null
                     ) {
 
                         extraInfo += `
-
-                    <p>
-
-                        🎟️ Días disponibles:
-
-                        <strong>
-                            ${data.dias_restantes}
-                        </strong>
-
-                    </p>
-
-                `;
+                <p>
+                    🎟️ Días disponibles:
+                    <strong>${data.dias_restantes}</strong>
+                </p>
+            `;
                     }
 
                     contenedor.innerHTML = `
+            <div
+                class="card-user"
+                style="border-left:6px solid ${color}"
+            >
 
-                <div
-                    class="card-user"
-                    style="
-                    border-left:
-                    6px solid ${color}"
-                >
+                <h3>
+                    Estado:
+                    <span style="color:${color}">
+                        ${estadoTexto}
+                    </span>
+                </h3>
 
-                    <h3>
-                        Estado:
-                        <span style="
-                        color:${color}">
-                        ${data.estado}
-                        </span>
-                    </h3>
+                <p>
+                    <strong>Inicio:</strong>
+                    ${formatearFecha(data.fecha_inicio)}
+                </p>
 
-                    <p>
+                <p>
+                    <strong>Fin:</strong>
+                    ${data.tipo === "beneficio"
+                            ? "Sin vencimiento"
+                            : formatearFecha(data.fecha_fin)
+                        }
+                </p>
 
-                        <strong>Inicio:</strong>
+                ${extraInfo}
 
-                        ${formatearFecha(
-                        data.fecha_inicio
-                    )}
-
-                    </p>
-
-                    <p>
-
-                        <strong>Fin:</strong>
-
-                        ${formatearFecha(
-                        data.fecha_fin
-                    )}
-
-                    </p>
-
-                    ${extraInfo}
-
-                    ${data.comprobante
-
+                ${data.comprobante
                             ?
-
                             `
-
-                        <a
-                            class="btn-secondary"
-                            href="/uploads/${data.comprobante}"
-                            target="_blank"
-                        >
-
-                            📄 Ver comprobante
-
-                        </a>
-
-                        `
-
+                    <a
+                        class="btn-secondary"
+                        href="/uploads/${data.comprobante}"
+                        target="_blank"
+                    >
+                        📄 Ver comprobante
+                    </a>
+                    `
                             :
-
                             ""
                         }
 
-                </div>
-
-            `;
+            </div>
+        `;
                 });
         }
+
+
 
         // AFORO
         function cargarAforo() {

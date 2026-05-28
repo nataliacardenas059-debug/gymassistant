@@ -281,7 +281,7 @@ table td {
 
 table tr:hover {
 
-    background: #f8f9fa;
+    background: #96cbff;
 }
 
 /* DARK MODE */
@@ -311,6 +311,11 @@ body.light .welcome-card {
         linear-gradient(135deg,
             #111827,
             #1f2937);
+}
+
+body.light table {
+    background: #ffffff;
+    color: black;
 }
 
 /* ANIMACIONES */

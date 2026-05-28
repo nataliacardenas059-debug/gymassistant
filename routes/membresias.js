@@ -192,7 +192,7 @@ router.post('/', upload.single('comprobante'), (req, res) => {
                    fecha_fin,
                    dias_restantes,
                    estado,
-                   comprobante) VALUES (?,'chequera',?, DATE_ADD(?, INTERVAL 30 DAY),?,'activa',?)
+                   comprobante) VALUES (?,'chequera',?,NULL,?,'activa',?)
                `, [persona_id, fecha_inicio, fecha_inicio, dias, comprobante], (err) => {
                 if (err) {
                     console.error(err);
