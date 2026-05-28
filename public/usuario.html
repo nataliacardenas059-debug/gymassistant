@@ -451,12 +451,16 @@
                                     registro.fecha_salida
                                 )
                                 :
-                                'Dentro del gimnasio'
+                                registro.estado === 'dentro'
+                                    ?
+                                    'Dentro del gimnasio'
+                                    :
+                                    'Sin salida registrada'
                             }
 
                     </td>
                     <td>
-                        ${registro.estado}
+                        ${registro.estado || 'Sin estado'}
                     </td>
                 </tr>
             `;

@@ -578,14 +578,23 @@ router.get('/historial/:id', (req, res) => {
 });
 
 router.put('/salida/:id', (req, res) => {
+
     const id = req.params.id;
+
     db.query(
+
         `
+
         SELECT tipo_persona
+
         FROM personas
+
         WHERE id = ?
+
         `,
+
         [id],
+
         (err, result) => {
 
             if (err || !result.length) {
@@ -596,10 +605,11 @@ router.put('/salida/:id', (req, res) => {
                         'Usuario no encontrado'
                 });
             }
+
             const tipo =
                 result[0].tipo_persona;
 
-            // ❌ ADMINISTRATIVOS NO
+            // ❌ ADMINISTRATIVOS
 
             if (tipo === 'administrativo') {
 
@@ -609,47 +619,82 @@ router.put('/salida/:id', (req, res) => {
                         'Los administrativos no registran salida'
                 });
             }
-            // ✅ ACTUALIZAR ÚLTIMO INGRESO
+
+            // 🔍 VALIDAR SI ESTÁ DENTRO
 
             db.query(
                 `
-                UPDATE registros_ingreso
-                SET
-
-                    estado = 'fuera',
-
-                    fecha_salida = NOW()
-
+                SELECT *
+                FROM registros_ingreso
                 WHERE
-
                     persona_id = ?
-
                     AND estado = 'dentro'
-
+                    AND fecha_salida IS NULL
                 ORDER BY id DESC
                 LIMIT 1
                 `,
                 [id],
-
-                (err2) => {
+                (err2, registros) => {
 
                     if (err2) {
-
-                        console.error(err2);
 
                         return res.status(500).json({
 
                             mensaje:
-                                'Error registrando salida'
+                                'Error validando salida'
                         });
                     }
-                    res.json({
 
-                        success: true,
+                    // ❌ NO HAY SALIDA
 
-                        mensaje:
-                            'Salida registrada correctamente'
-                    });
+                    if (!registros.length) {
+
+                        return res.json({
+
+                            mensaje:
+                                'No hay salida pendiente por registrar'
+                        });
+                    }
+
+                    // ✅ REGISTRAR SALIDA
+
+                    db.query(
+                        `
+                     UPDATE registros_ingreso
+                     SET estado = 'fuera',
+                     fecha_salida = NOW()
+                     WHERE
+                     persona_id = ?
+                     AND estado = 'dentro'
+                     AND fecha_salida IS NULL
+                     ORDER BY id DESC
+                     LIMIT 1
+                        `,
+
+                        [registros[0].id],
+
+                        (err3) => {
+
+                            if (err3) {
+
+                                console.error(err3);
+
+                                return res.status(500).json({
+
+                                    mensaje:
+                                        'Error registrando salida'
+                                });
+                            }
+
+                            res.json({
+
+                                success: true,
+
+                                mensaje:
+                                    'Salida registrada correctamente'
+                            });
+                        }
+                    );
                 }
             );
         }
